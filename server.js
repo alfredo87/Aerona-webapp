@@ -25,7 +25,7 @@ const entities = {
   mode: "sensor.grant_circuit_2_mode",
   boostRemaining: "sensor.grant_circuit_2_boost_remaining",
   dhwSetpoint: "sensor.grant_dhw_setpoint",
-  cylinderTemp: "sensor.grant_aerona_econet_cylinder_temperature",
+  cylinderTemp: "sensor.grant_controller_cylinder_temperature",
   power: "sensor.grant_controller_electrical_power",
   energyToday: "sensor.grant_estimated_electrical_energy_today",
   energyTotal: "sensor.grant_estimated_electrical_energy",

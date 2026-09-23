@@ -21,7 +21,7 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 - A Home Assistant Long-Lived Access Token.
 - Home Assistant entities with the IDs configured in `server.js`, including:
   - `sensor.grant_circuit_2_room_temperature`
-  - `sensor.grant_aerona_econet_cylinder_temperature`
+  - `sensor.grant_controller_cylinder_temperature`
   - `sensor.grant_aerona_econet_outdoor_sensor_temperature`
   - `sensor.grant_controller_flow_rate`
   - `sensor.grant_aerona_econet_ashp_fan_speed`
@@ -30,7 +30,7 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 - The HA actions `script.grant_circuit2_20c_20m_boost` and `rest_command.grant_dhw_one_off_loading`.
 
 The Circuit 2 room sensor should read the controller value at `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value.
-The flow-rate sensor should read `curr.currentFlow` and use `L/min`.
+The flow-rate sensor should read `curr.currentFlow` and use `L/min`. The cylinder temperature sensor should read `curr.TempCWU` directly from the controller.
 
 The live performance estimate uses `flow (L/min) × (flow temperature − return temperature) × 69.77` to calculate thermal output in W, then divides this by controller electrical power. It is a useful operational estimate, not a certified laboratory SCOP. The seasonal SPF starts when its Home Assistant integration sensors are created and includes both DHW and space heating.
 
