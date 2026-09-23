@@ -42,6 +42,8 @@ async function refresh() {
     text("thermal-power", show(data.thermalPower));
     text("cop", show(data.cop));
     text("spf", show(data.seasonalPerformance));
+    text("heating-cop", show(data.heatingCop));
+    text("dhw-cop", show(data.dhwCop));
     text("mode", data.mode.state);
     text("updated", `Updated ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`);
     document.body.classList.add("ready");
