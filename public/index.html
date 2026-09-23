@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101827">
+    <title>Grant Aerona</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <div><p class="eyebrow">GRANT AERONA</p><h1>Home climate</h1></div>
+        <div class="header-actions"><p id="updated" class="muted">Connecting…</p><button id="logout" class="logout">Sign out</button></div>
+      </header>
+
+      <section class="dashboard" aria-live="polite">
+        <article class="hero heating"><span>⌂</span><strong id="comfort">—</strong><small>Radiator heating target</small><div class="dial-context"><span>Room <b id="room">—</b></span><span>Outside <b id="outdoor">—</b></span></div></article>
+        <article class="tile eco"><span>⌁</span><p>Night time target</p><strong id="eco">—</strong></article>
+        <button class="round-action heating-action" data-action="circuit2-boost" style="--progress: 0turn"><span class="round-face"><i>♨</i><b>20°C</b><small id="boost">—</small></span><em>Radiator boost</em><small>Tap to run for 20 minutes</small></button>
+        <article class="hero hotwater"><span>♨</span><p>Hot Water Temperature</p><strong id="cylinder">—</strong><small>Target <span id="dhw">—</span></small></article>
+        <button class="round-action dhw-action" data-action="dhw-boost"><span class="round-face"><i class="water-plus"><span>💧</span><b>+</b></i><b id="dhw-button-value">—</b><small>Hot water temperature</small></span><em>DHW boost</em><small id="dhw-button-status">Heating towards target</small></button>
+        <article class="tile energy power-tile"><span>ϟ</span><p>Live power</p><strong id="power">—</strong></article>
+        <article class="tile energy today-tile"><span>▣</span><p>Energy today</p><strong id="today">—</strong></article>
+        <article class="tile neutral mode-tile"><span>◴</span><p>Schedule</p><strong id="mode">—</strong></article>
+        <article class="tile neutral total-tile"><span>ϟ</span><p>Since setup</p><strong id="total">—</strong></article>
+      </section>
+      <p id="notice" role="status"></p>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

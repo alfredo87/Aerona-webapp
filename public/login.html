@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101827">
+    <title>Aerona sign in</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body class="login-page">
+    <main class="login-shell">
+      <section class="login-card">
+        <p class="eyebrow">GRANT AERONA</p>
+        <h1>Home climate</h1>
+        <p class="muted">Sign in once to remember this device for 60 days.</p>
+        <form id="login-form">
+          <label>Username<input name="username" autocomplete="username" required></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+          <button type="submit">Sign in</button>
+          <p id="error" role="alert"></p>
+        </form>
+      </section>
+    </main>
+    <script>
+      document.getElementById('login-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        const result = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(form)) });
+        if (result.ok) location.assign('/');
+        else document.getElementById('error').textContent = 'Incorrect username or password.';
+      });
+    </script>
+  </body>
+</html>
