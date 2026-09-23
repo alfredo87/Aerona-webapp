@@ -9,6 +9,7 @@ const haToken = process.env.HA_TOKEN || "";
 const appUsername = process.env.APP_USERNAME || "";
 const appPassword = process.env.APP_PASSWORD || "";
 const sessionSecret = process.env.SESSION_SECRET || "";
+const cookieSecure = process.env.COOKIE_SECURE === "true";
 const publicDir = join(process.cwd(), "public");
 const sessionLifetimeSeconds = 60 * 24 * 60 * 60;
 
@@ -41,6 +42,10 @@ function credentialsMatch(username, password) {
 function signedSession(expiresAt) {
   const signature = createHmac("sha256", sessionSecret).update(String(expiresAt)).digest("base64url");
   return `${expiresAt}.${signature}`;
+}
+
+function sessionCookie(value, maxAge) {
+  return `aerona_session=${value}; Max-Age=${maxAge}; Path=/; HttpOnly; SameSite=Strict${cookieSecure ? "; Secure" : ""}`;
 }
 
 function cookieValue(request, name) {
@@ -130,10 +135,10 @@ createServer(async (request, response) => {
         return send(response, 401, JSON.stringify({ error: "Incorrect username or password." }), { "Content-Type": "application/json" });
       }
       const expiresAt = Date.now() + sessionLifetimeSeconds * 1000;
-      return send(response, 204, "", { "Set-Cookie": `aerona_session=${signedSession(expiresAt)}; Max-Age=${sessionLifetimeSeconds}; Path=/; HttpOnly; SameSite=Strict` });
+      return send(response, 204, "", { "Set-Cookie": sessionCookie(signedSession(expiresAt), sessionLifetimeSeconds) });
     }
     if (request.method === "POST" && url.pathname === "/api/logout") {
-      return send(response, 204, "", { "Set-Cookie": "aerona_session=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict" });
+      return send(response, 204, "", { "Set-Cookie": sessionCookie("", 0) });
     }
     if (!authorised(request)) {
       if (url.pathname.startsWith("/api/")) return send(response, 401, JSON.stringify({ error: "Please sign in." }), { "Content-Type": "application/json" });

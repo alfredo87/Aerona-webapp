@@ -58,6 +58,20 @@ The browser communicates only with this app. The app holds the Home Assistant to
 
 This deployment uses HTTP and is intended for a trusted LAN. Do not expose port 8787 to the internet. Use HTTPS before broader network use.
 
+## YunoHost deployment
+
+For an always-on, internet-accessible deployment, run the Docker container on a YunoHost server and publish it through a YunoHost-managed HTTPS domain or subdomain.
+
+In the YunoHost `.env`, set:
+
+```ini
+BIND_ADDRESS=127.0.0.1
+HOST_PORT=8787
+COOKIE_SECURE=true
+```
+
+Set `HA_URL` to the LAN address of Home Assistant. Create a YunoHost domain/subdomain with a valid HTTPS certificate, then configure its reverse proxy using [`docs/yunohost-nginx.conf.example`](docs/yunohost-nginx.conf.example). Do not forward port 8787 on your router: only ports 80/443 should be publicly reachable through YunoHost.
+
 ## Repository hygiene
 
 `.env` is excluded by `.gitignore`. Before any commit, run:
