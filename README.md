@@ -30,6 +30,18 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 The Circuit 2 room sensor should read the controller value at `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value.
 The flow-rate sensor should read `curr.currentFlow` and use `L/min`.
 
+Add it to the `sensor:` list of the existing `rest:` entry that polls `/econet/regParams`:
+
+```yaml
+- name: "Grant Controller Flow Rate"
+  unique_id: grant_controller_flow_rate
+  value_template: "{{ value_json.curr.currentFlow | float(0) }}"
+  unit_of_measurement: "L/min"
+  device_class: volume_flow_rate
+  state_class: measurement
+  icon: mdi:water-sync
+```
+
 ## Deploy
 
 1. In Home Assistant, open your user profile and create a **Long-Lived Access Token**. Treat it as a password; never commit or share it.
