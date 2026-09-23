@@ -36,7 +36,9 @@ const entities = {
   cop: "sensor.grant_estimated_cop",
   seasonalPerformance: "sensor.grant_seasonal_performance_factor",
   heatingCop: "sensor.grant_space_heating_cop",
-  dhwCop: "sensor.grant_dhw_cop"
+  dhwCop: "sensor.grant_dhw_cop",
+  heatingSpf: "sensor.grant_space_heating_spf",
+  dhwSpf: "sensor.grant_dhw_spf"
 };
 
 function credentialsMatch(username, password) {
