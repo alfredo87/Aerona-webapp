@@ -1,0 +1,8 @@
+services:
+  aerona-webapp:
+    build: .
+    container_name: aerona-webapp
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8787:8787"

@@ -1,0 +1,10 @@
+{
+  "name": "aerona-webapp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "LAN dashboard for a Grant Aerona controller via Home Assistant",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

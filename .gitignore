@@ -1,0 +1,11 @@
+# Runtime secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Node and operating-system files
+node_modules/
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
