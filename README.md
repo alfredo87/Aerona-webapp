@@ -8,6 +8,8 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 
 - Displays Circuit 2 target, room and outdoor temperatures, heating mode, live electrical power, and estimated energy.
 - Displays controller flow rate, fan speed, and water pressure in a compact System row.
+- Estimates live thermal output and COP from water flow, flow/return temperature difference, and controller electrical power.
+- Tracks an accumulating seasonal performance factor (SPF) from calculated thermal and electrical energy.
 - Displays the actual cylinder temperature and DHW target.
 - Provides a 20°C / 20-minute Circuit 2 boost and a one-off DHW-loading request.
 - Uses a local sign-in page with an HttpOnly 60-day device session.
@@ -29,6 +31,8 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 
 The Circuit 2 room sensor should read the controller value at `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value.
 The flow-rate sensor should read `curr.currentFlow` and use `L/min`.
+
+The live performance estimate uses `flow (L/min) × (flow temperature − return temperature) × 69.77` to calculate thermal output in W, then divides this by controller electrical power. It is a useful operational estimate, not a certified laboratory SCOP. The seasonal SPF starts when its Home Assistant integration sensors are created and includes both DHW and space heating.
 
 Add it to the `sensor:` list of the existing `rest:` entry that polls `/econet/regParams`:
 

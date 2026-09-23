@@ -31,7 +31,10 @@ const entities = {
   energyTotal: "sensor.grant_estimated_electrical_energy",
   flowRate: "sensor.grant_controller_flow_rate",
   fanSpeed: "sensor.grant_aerona_econet_ashp_fan_speed",
-  waterPressure: "sensor.grant_aerona_econet_ashp_outlet_water_pressure"
+  waterPressure: "sensor.grant_aerona_econet_ashp_outlet_water_pressure",
+  thermalPower: "sensor.grant_calculated_thermal_power",
+  cop: "sensor.grant_estimated_cop",
+  seasonalPerformance: "sensor.grant_seasonal_performance_factor"
 };
 
 function credentialsMatch(username, password) {

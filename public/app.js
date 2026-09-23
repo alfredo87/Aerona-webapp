@@ -39,6 +39,9 @@ async function refresh() {
     text("flow", show(data.flowRate, "L/min"));
     text("fan", show(data.fanSpeed, "rpm"));
     text("pressure", show(data.waterPressure, "bar"));
+    text("thermal-power", show(data.thermalPower));
+    text("cop", show(data.cop));
+    text("spf", show(data.seasonalPerformance));
     text("mode", data.mode.state);
     text("updated", `Updated ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`);
     document.body.classList.add("ready");
