@@ -7,6 +7,7 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 ## What it does
 
 - Displays Circuit 2 target, room and outdoor temperatures, heating mode, live electrical power, and estimated energy.
+- Displays controller flow rate, fan speed, and water pressure in a compact System row.
 - Displays the actual cylinder temperature and DHW target.
 - Provides a 20°C / 20-minute Circuit 2 boost and a one-off DHW-loading request.
 - Uses a local sign-in page with an HttpOnly 60-day device session.
@@ -20,10 +21,14 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
   - `sensor.grant_circuit_2_room_temperature`
   - `sensor.grant_aerona_econet_cylinder_temperature`
   - `sensor.grant_aerona_econet_outdoor_sensor_temperature`
+  - `sensor.grant_controller_flow_rate`
+  - `sensor.grant_aerona_econet_ashp_fan_speed`
+  - `sensor.grant_aerona_econet_ashp_outlet_water_pressure`
   - the Circuit 2, DHW and energy sensors listed in `server.js`
 - The HA actions `script.grant_circuit2_20c_20m_boost` and `rest_command.grant_dhw_one_off_loading`.
 
 The Circuit 2 room sensor should read the controller value at `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value.
+The flow-rate sensor should read `curr.currentFlow` and use `L/min`.
 
 ## Deploy
 

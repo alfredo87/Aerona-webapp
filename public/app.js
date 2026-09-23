@@ -6,7 +6,10 @@ const text = (id, value) => {
   element.textContent = value;
   element.classList.add("value-change");
 };
-const show = (entry) => `${entry.state}${entry.unit ? ` ${entry.unit}` : ""}`;
+const show = (entry, fallbackUnit = "") => {
+  if (entry.state === "unavailable" || entry.state === "unknown") return "—";
+  return `${entry.state}${entry.unit || fallbackUnit ? ` ${entry.unit || fallbackUnit}` : ""}`;
+};
 
 async function refresh() {
   try {
@@ -33,6 +36,9 @@ async function refresh() {
     text("power", show(data.power));
     text("today", show(data.energyToday));
     text("total", show(data.energyTotal));
+    text("flow", show(data.flowRate, "L/min"));
+    text("fan", show(data.fanSpeed, "rpm"));
+    text("pressure", show(data.waterPressure, "bar"));
     text("mode", data.mode.state);
     text("updated", `Updated ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`);
     document.body.classList.add("ready");

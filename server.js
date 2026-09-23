@@ -28,7 +28,10 @@ const entities = {
   cylinderTemp: "sensor.grant_aerona_econet_cylinder_temperature",
   power: "sensor.grant_controller_electrical_power",
   energyToday: "sensor.grant_estimated_electrical_energy_today",
-  energyTotal: "sensor.grant_estimated_electrical_energy"
+  energyTotal: "sensor.grant_estimated_electrical_energy",
+  flowRate: "sensor.grant_controller_flow_rate",
+  fanSpeed: "sensor.grant_aerona_econet_ashp_fan_speed",
+  waterPressure: "sensor.grant_aerona_econet_ashp_outlet_water_pressure"
 };
 
 function credentialsMatch(username, password) {
@@ -101,8 +104,13 @@ async function fromHa(path, options = {}) {
 
 async function overview() {
   const entries = await Promise.all(Object.entries(entities).map(async ([key, entityId]) => {
-    const state = await fromHa(`/api/states/${entityId}`);
-    return [key, { state: state.state, unit: state.attributes.unit_of_measurement || "" }];
+    try {
+      const state = await fromHa(`/api/states/${entityId}`);
+      return [key, { state: state.state, unit: state.attributes.unit_of_measurement || "" }];
+    } catch {
+      // A newly added optional sensor should not make the whole dashboard unavailable.
+      return [key, { state: "unavailable", unit: "" }];
+    }
   }));
   return Object.fromEntries(entries);
 }
