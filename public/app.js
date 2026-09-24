@@ -16,19 +16,20 @@ async function refresh() {
     const response = await fetch("/api/overview");
     if (!response.ok) throw new Error();
     const data = await response.json();
-    text("comfort", show(data.comfortTarget));
+    const minutes = Number.parseFloat(data.boostRemaining.state) || 0;
+    const effectiveTarget = minutes > 0 ? 20 : Number.parseFloat(data.comfortTarget.state);
+    text("comfort", Number.isFinite(effectiveTarget) ? `${effectiveTarget.toFixed(1)} °C` : "—");
     text("room", show(data.roomTemp));
     text("outdoor", show(data.outdoorTemp));
     text("eco", show(data.ecoTarget));
     const roomTemperature = Number.parseFloat(data.roomTemp.state);
-    const comfortTarget = Number.parseFloat(data.comfortTarget.state);
+    const comfortTarget = effectiveTarget;
     // A five-degree approach band makes the rim meaningful near the target.
     const roomProgress = Number.isFinite(roomTemperature) && Number.isFinite(comfortTarget)
       ? Math.min(1, Math.max(0, (roomTemperature - (comfortTarget - 5)) / 5))
       : 0;
     document.querySelector(".heating").style.setProperty("--room-progress", `${roomProgress}turn`);
     text("boost", show(data.boostRemaining));
-    const minutes = Number.parseFloat(data.boostRemaining.state) || 0;
     document.querySelector(".heating-action").style.setProperty("--progress", `${Math.min(20, Math.max(0, minutes)) / 20}turn`);
     text("dhw", show(data.dhwSetpoint));
     text("cylinder", show(data.cylinderTemp));
