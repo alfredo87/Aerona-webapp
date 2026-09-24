@@ -20,6 +20,13 @@ async function refresh() {
     text("room", show(data.roomTemp));
     text("outdoor", show(data.outdoorTemp));
     text("eco", show(data.ecoTarget));
+    const roomTemperature = Number.parseFloat(data.roomTemp.state);
+    const comfortTarget = Number.parseFloat(data.comfortTarget.state);
+    // A five-degree approach band makes the rim meaningful near the target.
+    const roomProgress = Number.isFinite(roomTemperature) && Number.isFinite(comfortTarget)
+      ? Math.min(1, Math.max(0, (roomTemperature - (comfortTarget - 5)) / 5))
+      : 0;
+    document.querySelector(".heating").style.setProperty("--room-progress", `${roomProgress}turn`);
     text("boost", show(data.boostRemaining));
     const minutes = Number.parseFloat(data.boostRemaining.state) || 0;
     document.querySelector(".heating-action").style.setProperty("--progress", `${Math.min(20, Math.max(0, minutes)) / 20}turn`);
