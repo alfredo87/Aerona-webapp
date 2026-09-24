@@ -4,6 +4,10 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 
 ![Licence](https://img.shields.io/badge/licence-not%20yet%20chosen-lightgrey)
 
+<img width="1022" height="825" alt="Screenshot_2026-09-24_11-22-28" src="https://github.com/user-attachments/assets/a7c62247-1cb0-457a-9dee-b0c8e55d29c4" />
+
+
+
 ## What it does
 
 - Displays Circuit 2 target, room and outdoor temperatures, heating mode, live electrical power, and estimated energy.
