@@ -33,22 +33,30 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
   - the Circuit 2, DHW and energy sensors listed in `server.js`
 - The HA actions `script.grant_circuit2_20c_20m_boost` and `rest_command.grant_dhw_one_off_loading`.
 
-The Circuit 2 room sensor should read the controller value at `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value.
-The flow-rate sensor should read `curr.currentFlow` and use `L/min`. The cylinder temperature sensor should read `curr.TempCWU` directly from the controller.
+The Circuit 2 room sensor should read `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value. The direct controller sensors use the same `/econet/regParams` REST response: `curr.TempCWU` for cylinder temperature, `curr.TempWthr` for outdoor temperature, `curr.currentFlow` for flow rate, tile `3` for fan speed, and tile `76` for water pressure.
 
-The live performance estimate uses `flow (L/min) × (flow temperature − return temperature) × 69.77` to calculate thermal output in W, then divides this by controller electrical power. It is a useful operational estimate, not a certified laboratory SCOP. The seasonal SPF starts when its Home Assistant integration sensors are created and includes both DHW and space heating.
+### Direct-controller REST sensors
 
-Add it to the `sensor:` list of the existing `rest:` entry that polls `/econet/regParams`:
+Add each direct-controller sensor as an item in the `sensor:` list of the *existing* `rest:` entry that polls `/econet/regParams`. Do not create another top-level `rest:` section.
+
+For example, the flow-rate entry belongs at the same indentation level as the other entries beneath `sensor:`:
 
 ```yaml
-- name: "Grant Controller Flow Rate"
-  unique_id: grant_controller_flow_rate
-  value_template: "{{ value_json.curr.currentFlow | float(0) }}"
-  unit_of_measurement: "L/min"
-  device_class: volume_flow_rate
-  state_class: measurement
-  icon: mdi:water-sync
+rest:
+  - resource: "http://ECONET_IP/econet/regParams"
+    # authentication, username, password, and scan interval omitted
+    sensor:
+      # Existing REST sensors go here
+      - name: "Grant Controller Flow Rate"
+        unique_id: grant_controller_flow_rate
+        value_template: "{{ value_json.curr.currentFlow | float(0) }}"
+        unit_of_measurement: "L/min"
+        device_class: volume_flow_rate
+        state_class: measurement
+        icon: mdi:water-sync
 ```
+
+The live performance estimate uses `flow (L/min) × (flow temperature − return temperature) × 69.77` to calculate thermal output in W, then divides this by controller electrical power. It is a useful operational estimate, not a certified laboratory SCOP. The seasonal SPF starts when its Home Assistant integration sensors are created and includes both DHW and space heating.
 
 ## Deploy
 
