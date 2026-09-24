@@ -24,7 +24,7 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
   - `sensor.grant_controller_cylinder_temperature`
   - `sensor.grant_controller_outdoor_temperature`
   - `sensor.grant_controller_flow_rate`
-  - `sensor.grant_aerona_econet_ashp_fan_speed`
+  - `sensor.grant_controller_fan_speed`
   - `sensor.grant_controller_water_pressure`
   - the Circuit 2, DHW and energy sensors listed in `server.js`
 - The HA actions `script.grant_circuit2_20c_20m_boost` and `rest_command.grant_dhw_one_off_loading`.

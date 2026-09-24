@@ -30,7 +30,7 @@ const entities = {
   energyToday: "sensor.grant_estimated_electrical_energy_today",
   energyTotal: "sensor.grant_estimated_electrical_energy",
   flowRate: "sensor.grant_controller_flow_rate",
-  fanSpeed: "sensor.grant_aerona_econet_ashp_fan_speed",
+  fanSpeed: "sensor.grant_controller_fan_speed",
   waterPressure: "sensor.grant_controller_water_pressure",
   thermalPower: "sensor.grant_calculated_thermal_power",
   cop: "sensor.grant_estimated_cop",
