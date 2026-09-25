@@ -15,7 +15,7 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 - Estimates live thermal output and COP from water flow, flow/return temperature difference, and controller electrical power.
 - Tracks an accumulating seasonal performance factor (SPF) from calculated thermal and electrical energy.
 - Displays the actual cylinder temperature and DHW target.
-- Provides an Arrival Heat control: choose 1, 2, 4, or 8 hours of Circuit 2 Comfort mode, then it automatically returns to Scheduled mode. It also provides a one-off DHW-loading request.
+- Provides Arrival Heat (1, 2, 4, or 8 hours of Circuit 2 Comfort mode, then automatic Scheduled-mode return) and Away / Eco hold (Night/Eco mode until manually resumed), plus a one-off DHW-loading request.
 - Uses a local sign-in page with an HttpOnly 60-day device session.
 - Keeps the Home Assistant token and controller credentials out of the browser.
 

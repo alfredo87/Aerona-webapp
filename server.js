@@ -185,6 +185,22 @@ async function startArrivalHeat(hours) {
   }
 }
 
+async function startAwayEco() {
+  const previousArrivalHeat = arrivalHeat;
+  arrivalHeat = { resumeAt: 0 };
+  try {
+    await saveArrivalHeat();
+    if (resumeTimer) clearTimeout(resumeTimer);
+    resumeTimer = undefined;
+    await setCircuit2Mode(2);
+  } catch (error) {
+    arrivalHeat = previousArrivalHeat;
+    await saveArrivalHeat().catch(() => {});
+    if (arrivalHeat.resumeAt > Date.now()) planReturnToSchedule();
+    throw error;
+  }
+}
+
 function contentType(path) {
   return ({ ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".webmanifest": "application/manifest+json" })[extname(path)] || "application/octet-stream";
 }
@@ -233,6 +249,10 @@ createServer(async (request, response) => {
       const { hours } = await readJson(request);
       if (!arrivalDurations.has(hours)) return send(response, 400, JSON.stringify({ error: "Choose 1, 2, 4 or 8 hours." }), { "Content-Type": "application/json" });
       await startArrivalHeat(hours);
+      return send(response, 204, "");
+    }
+    if (request.method === "POST" && url.pathname === "/api/actions/away-eco") {
+      await startAwayEco();
       return send(response, 204, "");
     }
     if (request.method === "POST" && url.pathname === "/api/actions/resume-schedule") {

@@ -73,7 +73,9 @@ document.querySelectorAll("[data-action]").forEach((button) => button.addEventLi
     ? "Start one-off DHW cylinder loading?"
     : action === "arrival-heat"
       ? `Use Circuit 2 Comfort mode for ${hours} hour${hours === 1 ? "" : "s"}, then automatically resume the normal schedule?`
-      : "Return Circuit 2 to its normal schedule now?";
+      : action === "away-eco"
+        ? "Hold Circuit 2 at its Night/Eco target until you choose Resume schedule?"
+        : "Return Circuit 2 to its normal schedule now?";
   if (!confirm(prompt)) return;
   button.disabled = true;
   button.classList.add("sending");
@@ -85,7 +87,7 @@ document.querySelectorAll("[data-action]").forEach((button) => button.addEventLi
       body: action === "arrival-heat" ? JSON.stringify({ hours }) : undefined
     });
     if (!response.ok) throw new Error();
-    text("notice", dhw ? "DHW boost requested." : action === "arrival-heat" ? "Arrival Heat started." : "Circuit 2 returned to Scheduled mode.");
+    text("notice", dhw ? "DHW boost requested." : action === "arrival-heat" ? "Arrival Heat started." : action === "away-eco" ? "Circuit 2 is holding the Eco target." : "Circuit 2 returned to Scheduled mode.");
     setTimeout(refresh, 1500);
   } catch {
     text("notice", "The request could not be completed.");
