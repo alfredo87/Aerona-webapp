@@ -16,8 +16,7 @@ async function refresh() {
     const response = await fetch("/api/overview");
     if (!response.ok) throw new Error();
     const data = await response.json();
-    const minutes = Number.parseFloat(data.boostRemaining.state) || 0;
-    const effectiveTarget = minutes > 0 ? 20 : Number.parseFloat(data.comfortTarget.state);
+    const effectiveTarget = Number.parseFloat(data.comfortTarget.state);
     text("comfort", Number.isFinite(effectiveTarget) ? `${effectiveTarget.toFixed(1)} °C` : "—");
     text("room", show(data.roomTemp));
     text("outdoor", show(data.outdoorTemp));
@@ -29,8 +28,12 @@ async function refresh() {
       ? Math.min(1, Math.max(0, (roomTemperature - (comfortTarget - 5)) / 5))
       : 0;
     document.querySelector(".heating").style.setProperty("--room-progress", `${roomProgress}turn`);
-    text("boost", show(data.boostRemaining));
-    document.querySelector(".heating-action").style.setProperty("--progress", `${Math.min(20, Math.max(0, minutes)) / 20}turn`);
+    const resumeAt = Number(data.arrivalHeat?.resumeAt) || 0;
+    const arrivalActive = resumeAt > Date.now();
+    text("arrival-status", arrivalActive
+      ? `Comfort until ${new Date(resumeAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+      : "Following schedule");
+    document.querySelector(".arrival-card").classList.toggle("arrival-active", arrivalActive);
     text("dhw", show(data.dhwSetpoint));
     text("cylinder", show(data.cylinderTemp));
     text("dhw-button-value", show(data.cylinderTemp));
@@ -63,15 +66,26 @@ async function refresh() {
 }
 
 document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", async () => {
-  const dhw = button.dataset.action === "dhw-boost";
-  if (!confirm(dhw ? "Start one-off DHW cylinder loading?" : "Start the 20°C radiator boost for 20 minutes?")) return;
+  const action = button.dataset.action;
+  const dhw = action === "dhw-boost";
+  const hours = Number(button.dataset.hours);
+  const prompt = dhw
+    ? "Start one-off DHW cylinder loading?"
+    : action === "arrival-heat"
+      ? `Use Circuit 2 Comfort mode for ${hours} hour${hours === 1 ? "" : "s"}, then automatically resume the normal schedule?`
+      : "Return Circuit 2 to its normal schedule now?";
+  if (!confirm(prompt)) return;
   button.disabled = true;
   button.classList.add("sending");
   text("notice", "Sending request…");
   try {
-    const response = await fetch(`/api/actions/${button.dataset.action}`, { method: "POST" });
+    const response = await fetch(`/api/actions/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: action === "arrival-heat" ? JSON.stringify({ hours }) : undefined
+    });
     if (!response.ok) throw new Error();
-    text("notice", dhw ? "DHW boost requested." : "Radiator boost started.");
+    text("notice", dhw ? "DHW boost requested." : action === "arrival-heat" ? "Arrival Heat started." : "Circuit 2 returned to Scheduled mode.");
     setTimeout(refresh, 1500);
   } catch {
     text("notice", "The request could not be completed.");

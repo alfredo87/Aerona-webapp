@@ -15,7 +15,7 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 - Estimates live thermal output and COP from water flow, flow/return temperature difference, and controller electrical power.
 - Tracks an accumulating seasonal performance factor (SPF) from calculated thermal and electrical energy.
 - Displays the actual cylinder temperature and DHW target.
-- Provides a 20°C / 20-minute Circuit 2 boost and a one-off DHW-loading request.
+- Provides an Arrival Heat control: choose 1, 2, 4, or 8 hours of Circuit 2 Comfort mode, then it automatically returns to Scheduled mode. It also provides a one-off DHW-loading request.
 - Uses a local sign-in page with an HttpOnly 60-day device session.
 - Keeps the Home Assistant token and controller credentials out of the browser.
 
@@ -31,9 +31,24 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
   - `sensor.grant_controller_fan_speed`
   - `sensor.grant_controller_water_pressure`
   - the Circuit 2, DHW and energy sensors listed in `server.js`
-- The HA actions `script.grant_circuit2_20c_20m_boost` and `rest_command.grant_dhw_one_off_loading`.
+- The HA REST commands `rest_command.grant_circuit2_set_mode` and `rest_command.grant_dhw_one_off_loading`.
 
 The Circuit 2 room sensor should read `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value. The direct controller sensors use the same `/econet/regParams` REST response: `curr.TempCWU` for cylinder temperature, `curr.TempWthr` for outdoor temperature, `curr.currentFlow` for flow rate, tile `3` for fan speed, and tile `76` for water pressure.
+
+### Arrival Heat control
+
+Add this command beneath your existing `rest_command:` entry, using the same controller credentials as your other commands:
+
+```yaml
+  grant_circuit2_set_mode:
+    url: "http://ECONET_IP/econet/newParam?newParamName=286&newParamValue={{ value }}"
+    method: PUT
+    username: !secret econet_http_username
+    password: !secret econet_http_password
+    authentication: basic
+```
+
+The app uses value `1` for Circuit 2 Comfort/Day mode and `3` to restore Scheduled mode. Its return time is saved in the Docker `data/` directory so a container restart does not lose it.
 
 ### Direct-controller REST sensors
 

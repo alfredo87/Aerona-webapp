@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { extname, join, normalize } from "node:path";
+import { dirname, extname, join, normalize } from "node:path";
 
 const port = Number(process.env.PORT || 8787);
 const haUrl = (process.env.HA_URL || "").replace(/\/$/, "");
@@ -10,8 +10,12 @@ const appUsername = process.env.APP_USERNAME || "";
 const appPassword = process.env.APP_PASSWORD || "";
 const sessionSecret = process.env.SESSION_SECRET || "";
 const cookieSecure = process.env.COOKIE_SECURE === "true";
+const stateFile = process.env.STATE_FILE || "/data/arrival-heat.json";
 const publicDir = join(process.cwd(), "public");
 const sessionLifetimeSeconds = 60 * 24 * 60 * 60;
+const arrivalDurations = new Set([1, 2, 4, 8]);
+let arrivalHeat = { resumeAt: 0 };
+let resumeTimer;
 
 if (!haUrl || !haToken || !appUsername || !appPassword || !sessionSecret) {
   throw new Error("HA_URL, HA_TOKEN, APP_USERNAME, APP_PASSWORD and SESSION_SECRET must be set in .env");
@@ -23,7 +27,6 @@ const entities = {
   outdoorTemp: "sensor.grant_controller_outdoor_temperature",
   ecoTarget: "sensor.grant_circuit_2_eco_target",
   mode: "sensor.grant_circuit_2_mode",
-  boostRemaining: "sensor.grant_circuit_2_boost_remaining",
   dhwSetpoint: "sensor.grant_dhw_setpoint",
   cylinderTemp: "sensor.grant_controller_cylinder_temperature",
   power: "sensor.grant_controller_electrical_power",
@@ -119,7 +122,67 @@ async function overview() {
       return [key, { state: "unavailable", unit: "" }];
     }
   }));
-  return Object.fromEntries(entries);
+  return { ...Object.fromEntries(entries), arrivalHeat: { resumeAt: arrivalHeat.resumeAt || 0 } };
+}
+
+async function saveArrivalHeat() {
+  await mkdir(dirname(stateFile), { recursive: true });
+  const temporaryFile = `${stateFile}.tmp`;
+  await writeFile(temporaryFile, JSON.stringify(arrivalHeat), "utf8");
+  await rename(temporaryFile, stateFile);
+}
+
+async function loadArrivalHeat() {
+  try {
+    const saved = JSON.parse(await readFile(stateFile, "utf8"));
+    if (Number.isSafeInteger(saved.resumeAt) && saved.resumeAt > 0) arrivalHeat = { resumeAt: saved.resumeAt };
+  } catch (error) {
+    if (error.code !== "ENOENT") console.error(`Could not read arrival-heat state: ${error.message}`);
+  }
+}
+
+async function setCircuit2Mode(value) {
+  await fromHa("/api/services/rest_command/grant_circuit2_set_mode", {
+    method: "POST",
+    body: JSON.stringify({ value })
+  });
+}
+
+async function returnToSchedule() {
+  try {
+    await setCircuit2Mode(3);
+    arrivalHeat = { resumeAt: 0 };
+    await saveArrivalHeat();
+    if (resumeTimer) clearTimeout(resumeTimer);
+    resumeTimer = undefined;
+  } catch (error) {
+    console.error(`Could not restore Circuit 2 schedule: ${error.message}`);
+    resumeTimer = setTimeout(returnToSchedule, 5 * 60 * 1000);
+    throw error;
+  }
+}
+
+function planReturnToSchedule() {
+  if (resumeTimer) clearTimeout(resumeTimer);
+  const delay = arrivalHeat.resumeAt - Date.now();
+  if (delay <= 0) {
+    void returnToSchedule().catch(() => {});
+    return;
+  }
+  resumeTimer = setTimeout(() => { void returnToSchedule().catch(() => {}); }, delay);
+}
+
+async function startArrivalHeat(hours) {
+  await setCircuit2Mode(1);
+  arrivalHeat = { resumeAt: Date.now() + hours * 60 * 60 * 1000 };
+  try {
+    await saveArrivalHeat();
+    planReturnToSchedule();
+  } catch (error) {
+    arrivalHeat = { resumeAt: 0 };
+    await setCircuit2Mode(3).catch(() => {});
+    throw error;
+  }
 }
 
 function contentType(path) {
@@ -137,6 +200,9 @@ async function staticFile(pathname, response) {
     send(response, 404, "Not found");
   }
 }
+
+await loadArrivalHeat();
+if (arrivalHeat.resumeAt) planReturnToSchedule();
 
 createServer(async (request, response) => {
   const url = new URL(request.url, `http://${request.headers.host}`);
@@ -163,8 +229,14 @@ createServer(async (request, response) => {
     if (request.method === "GET" && url.pathname === "/api/overview") {
       return send(response, 200, JSON.stringify(await overview()), { "Content-Type": "application/json" });
     }
-    if (request.method === "POST" && url.pathname === "/api/actions/circuit2-boost") {
-      await fromHa("/api/services/script/turn_on", { method: "POST", body: JSON.stringify({ entity_id: "script.grant_circuit2_20c_20m_boost" }) });
+    if (request.method === "POST" && url.pathname === "/api/actions/arrival-heat") {
+      const { hours } = await readJson(request);
+      if (!arrivalDurations.has(hours)) return send(response, 400, JSON.stringify({ error: "Choose 1, 2, 4 or 8 hours." }), { "Content-Type": "application/json" });
+      await startArrivalHeat(hours);
+      return send(response, 204, "");
+    }
+    if (request.method === "POST" && url.pathname === "/api/actions/resume-schedule") {
+      await returnToSchedule();
       return send(response, 204, "");
     }
     if (request.method === "POST" && url.pathname === "/api/actions/dhw-boost") {

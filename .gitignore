@@ -9,3 +9,6 @@ npm-debug.log*
 *.log
 .DS_Store
 Thumbs.db
+
+# Persisted Arrival Heat return timer
+data/
