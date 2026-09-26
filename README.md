@@ -6,6 +6,7 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 
 ![Aerona web app dashboard](docs/aerona-dashboard.png)
 
+For the full project case study, architecture, controls guide, performance-calculation notes and limitations, see [the technical article](TECHNICAL_ARTICLE.md).
 
 
 ## What it does
@@ -102,7 +103,7 @@ The live performance estimate uses `flow (L/min) × (flow temperature − return
 
 ## Security model
 
-The browser communicates only with this app. The app holds the Home Assistant token server-side and exposes only the dashboard's selected sensors and two verified actions. It does not expose a general Home Assistant API or direct ecoNET access.
+The browser communicates only with this app. The app holds the Home Assistant token server-side and exposes only the dashboard's selected sensors and verified actions. It does not expose a general Home Assistant API or direct ecoNET access.
 
 This deployment uses HTTP and is intended for a trusted LAN. Do not expose port 8787 to the internet. Use HTTPS before broader network use.
 
