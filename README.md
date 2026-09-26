@@ -2,7 +2,8 @@
 
 A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET controller. It runs in Docker on a local machine and talks only to Home Assistant; the browser never contacts the ecoNET hub directly.
 
-[![LICENCE](https://img.shields.io/badge/BSD-FFFFFF)](#)
+![License: BSD 2-Clause](https://img.shields.io/badge/License-BSD%202--Clause-green.svg)
+
 
 ![Aerona web app dashboard](docs/aerona-dashboard.png)
 
