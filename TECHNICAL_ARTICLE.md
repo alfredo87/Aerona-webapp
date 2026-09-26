@@ -206,3 +206,6 @@ The strongest improvements would be a dedicated electricity meter, a calibrated 
 This project shows that a useful heat-pump interface need not replace the manufacturer's controller or expose it to the internet. Keeping ecoNET local, using Home Assistant as the boundary, and publishing only a few tested actions through a small HTTPS app delivers a clearer view of the Aerona and practical control for ordinary life.
 
 The essential discipline is restraint: observe first, make one change at a time, and allow the heat pump's own safety and scheduling functions to remain authoritative.
+
+## 11.Acknowledgement
+This project was completed with the use of chatGPT Version 26.908.70816
