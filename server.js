@@ -14,7 +14,7 @@ const stateFile = process.env.STATE_FILE || "/data/arrival-heat.json";
 const publicDir = join(process.cwd(), "public");
 const sessionLifetimeSeconds = 60 * 24 * 60 * 60;
 const arrivalDurations = new Set([1, 2, 4, 8]);
-let arrivalHeat = { resumeAt: 0 };
+let arrivalHeat = { resumeAt: 0, lastHeatingCop: null, lastDhwCop: null };
 let resumeTimer;
 
 if (!haUrl || !haToken || !appUsername || !appPassword || !sessionSecret) {
@@ -122,7 +122,24 @@ async function overview() {
       return [key, { state: "unavailable", unit: "" }];
     }
   }));
-  return { ...Object.fromEntries(entries), arrivalHeat: { resumeAt: arrivalHeat.resumeAt || 0 } };
+  const data = Object.fromEntries(entries);
+  let savedCopChanged = false;
+
+  for (const [entityKey, stateKey] of [["heatingCop", "lastHeatingCop"], ["dhwCop", "lastDhwCop"]]) {
+    const currentValue = Number.parseFloat(data[entityKey].state);
+    if (Number.isFinite(currentValue) && currentValue > 0) {
+      const rounded = Number(currentValue.toFixed(2));
+      if (arrivalHeat[stateKey] !== rounded) {
+        arrivalHeat[stateKey] = rounded;
+        savedCopChanged = true;
+      }
+    } else if (Number.isFinite(arrivalHeat[stateKey]) && arrivalHeat[stateKey] > 0) {
+      data[entityKey] = { state: String(arrivalHeat[stateKey]), unit: "COP", retained: true };
+    }
+  }
+
+  if (savedCopChanged) await saveArrivalHeat();
+  return { ...data, arrivalHeat: { resumeAt: arrivalHeat.resumeAt || 0 } };
 }
 
 async function saveArrivalHeat() {
@@ -135,7 +152,11 @@ async function saveArrivalHeat() {
 async function loadArrivalHeat() {
   try {
     const saved = JSON.parse(await readFile(stateFile, "utf8"));
-    if (Number.isSafeInteger(saved.resumeAt) && saved.resumeAt > 0) arrivalHeat = { resumeAt: saved.resumeAt };
+    arrivalHeat = {
+      resumeAt: Number.isSafeInteger(saved.resumeAt) && saved.resumeAt > 0 ? saved.resumeAt : 0,
+      lastHeatingCop: Number.isFinite(saved.lastHeatingCop) && saved.lastHeatingCop > 0 ? saved.lastHeatingCop : null,
+      lastDhwCop: Number.isFinite(saved.lastDhwCop) && saved.lastDhwCop > 0 ? saved.lastDhwCop : null
+    };
   } catch (error) {
     if (error.code !== "ENOENT") console.error(`Could not read arrival-heat state: ${error.message}`);
   }
@@ -151,7 +172,7 @@ async function setCircuit2Mode(value) {
 async function returnToSchedule() {
   try {
     await setCircuit2Mode(3);
-    arrivalHeat = { resumeAt: 0 };
+    arrivalHeat = { ...arrivalHeat, resumeAt: 0 };
     await saveArrivalHeat();
     if (resumeTimer) clearTimeout(resumeTimer);
     resumeTimer = undefined;
@@ -174,12 +195,12 @@ function planReturnToSchedule() {
 
 async function startArrivalHeat(hours) {
   await setCircuit2Mode(1);
-  arrivalHeat = { resumeAt: Date.now() + hours * 60 * 60 * 1000 };
+  arrivalHeat = { ...arrivalHeat, resumeAt: Date.now() + hours * 60 * 60 * 1000 };
   try {
     await saveArrivalHeat();
     planReturnToSchedule();
   } catch (error) {
-    arrivalHeat = { resumeAt: 0 };
+    arrivalHeat = { ...arrivalHeat, resumeAt: 0 };
     await setCircuit2Mode(3).catch(() => {});
     throw error;
   }
@@ -187,7 +208,7 @@ async function startArrivalHeat(hours) {
 
 async function startAwayEco() {
   const previousArrivalHeat = arrivalHeat;
-  arrivalHeat = { resumeAt: 0 };
+  arrivalHeat = { ...arrivalHeat, resumeAt: 0 };
   try {
     await saveArrivalHeat();
     if (resumeTimer) clearTimeout(resumeTimer);

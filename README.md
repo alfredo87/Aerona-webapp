@@ -77,7 +77,7 @@ The live performance estimate uses `flow (L/min) × (flow temperature − return
 
 ### Retaining the last heating and DHW COP readings
 
-Live COP is meaningful only while the heat pump is running. To keep the separate Heating COP and DHW COP cards visible while it is idle, the two template sensors below retain their most recent valid value. The cards therefore show the **last measured** COP, not a live result, until the relevant next cycle updates them.
+Live COP is meaningful only while the heat pump is running. To keep the separate Heating COP and DHW COP cards visible while it is idle, the two template sensors below retain their most recent valid value. The app also persists the last valid COP it receives as a second safeguard. The cards therefore show the **last measured** COP, not a live result, until the relevant next cycle updates them.
 
 Replace the existing Heating COP and DHW COP sensor blocks in your existing `template:` → `sensor:` list with these blocks. Do not add a second top-level `template:` section.
 

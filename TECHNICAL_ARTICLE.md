@@ -120,7 +120,7 @@ The `69.77` factor is the approximate heat capacity and density of water express
 
 The results are useful operational estimates, particularly for trends and comparisons. They are not certified SCOP figures. Sensor accuracy, measurement position, pump consumption, defrosting, DHW stratification, auxiliary heat, sampling interval and integration start date all influence them. Billing-grade or certification-grade figures require a dedicated electricity meter and calibrated heat meter.
 
-When idle, live COP is naturally unavailable. The separate Heating COP and DHW COP sensors retain their last valid result so the dashboard remains informative; they should be understood as **last measured** values until the next respective cycle updates them.
+When idle, live COP is naturally unavailable. The separate Heating COP and DHW COP sensors, with a persistent app-side fallback, retain their last valid result so the dashboard remains informative; they should be understood as **last measured** values until the next respective cycle updates them.
 
 ## 7. Weather compensation
 

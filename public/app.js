@@ -55,6 +55,8 @@ async function refresh() {
     text("spf", show(data.seasonalPerformance));
     text("heating-cop", show(data.heatingCop));
     text("dhw-cop", show(data.dhwCop));
+    text("heating-cop-label", data.heatingCop.retained ? "Last heating COP" : "Heating COP");
+    text("dhw-cop-label", data.dhwCop.retained ? "Last DHW COP" : "DHW COP");
     text("heating-spf", show(data.heatingSpf));
     text("dhw-spf", show(data.dhwSpf));
     text("mode", data.mode.state);
