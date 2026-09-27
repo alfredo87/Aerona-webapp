@@ -75,6 +75,48 @@ rest:
 
 The live performance estimate uses `flow (L/min) × (flow temperature − return temperature) × 69.77` to calculate thermal output in W, then divides this by controller electrical power. It is a useful operational estimate, not a certified laboratory SCOP. The seasonal SPF starts when its Home Assistant integration sensors are created and includes both DHW and space heating.
 
+### Retaining the last heating and DHW COP readings
+
+Live COP is meaningful only while the heat pump is running. To keep the separate Heating COP and DHW COP cards visible while it is idle, the two template sensors below retain their most recent valid value. The cards therefore show the **last measured** COP, not a live result, until the relevant next cycle updates them.
+
+Replace the existing Heating COP and DHW COP sensor blocks in your existing `template:` → `sensor:` list with these blocks. Do not add a second top-level `template:` section.
+
+```yaml
+      - name: "Grant Space Heating COP"
+        unique_id: grant_space_heating_cop
+        unit_of_measurement: "COP"
+        state_class: measurement
+        icon: mdi:home-thermometer
+        state: >
+          {% set valve = states('sensor.grant_aerona_econet_three_way_valve_state') %}
+          {% set cop = states('sensor.grant_estimated_cop') | float(none) %}
+          {% if valve == 'CH' and cop is not none and cop > 0 %}
+            {{ cop | round(2) }}
+          {% elif this.state not in ['unknown', 'unavailable', 'none', ''] %}
+            {{ this.state }}
+          {% else %}
+            {{ none }}
+          {% endif %}
+
+      - name: "Grant DHW COP"
+        unique_id: grant_dhw_cop
+        unit_of_measurement: "COP"
+        state_class: measurement
+        icon: mdi:water-thermometer
+        state: >
+          {% set valve = states('sensor.grant_aerona_econet_three_way_valve_state') %}
+          {% set cop = states('sensor.grant_estimated_cop') | float(none) %}
+          {% if valve == 'DHW' and cop is not none and cop > 0 %}
+            {{ cop | round(2) }}
+          {% elif this.state not in ['unknown', 'unavailable', 'none', ''] %}
+            {{ this.state }}
+          {% else %}
+            {{ none }}
+          {% endif %}
+```
+
+Run a configuration check and restart Home Assistant. Until each type of heating has run at least once after the change, that card will correctly remain unavailable.
+
 ## Deploy
 
 1. In Home Assistant, open your user profile and create a **Long-Lived Access Token**. Treat it as a password; never commit or share it.
