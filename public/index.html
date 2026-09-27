@@ -25,7 +25,20 @@
           <div class="arrival-secondary"><button class="away-eco" data-action="away-eco">Hold Eco while away</button><button class="resume-schedule" data-action="resume-schedule">Resume schedule</button></div>
         </section>
         <article class="hero hotwater"><span>♨</span><p>Hot Water Temperature</p><strong id="cylinder">—</strong><small>Target <span id="dhw">—</span></small></article>
-        <button class="round-action dhw-action" data-action="dhw-boost"><span class="round-face"><i class="water-plus"><span>💧</span><b>+</b></i><b id="dhw-button-value">—</b><small>Hot water temperature</small></span><em>DHW boost</em><small id="dhw-button-status">Heating towards target</small></button>
+        <button class="round-action dhw-action" data-action="dhw-boost">
+          <span class="round-face">
+            <i class="water-plus">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M12 2.5C10 6.2 5.5 10.4 5.5 14.7a6.5 6.5 0 0 0 13 0C18.5 10.4 14 6.2 12 2.5Z"/>
+              </svg>
+              <b>+</b>
+            </i>
+            <b id="dhw-button-value">—</b>
+            <small>Hot water temperature</small>
+          </span>
+          <em>DHW boost</em>
+          <small id="dhw-button-status">Heating towards target</small>
+        </button>
         <article class="tile energy power-tile"><span>ϟ</span><p>Live power</p><strong id="power">—</strong></article>
         <article class="tile energy today-tile"><span>▣</span><p>Energy today</p><strong id="today">—</strong></article>
         <article class="tile neutral mode-tile"><span>◴</span><p>Schedule</p><strong id="mode">—</strong></article>
