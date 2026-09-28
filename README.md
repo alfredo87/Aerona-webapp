@@ -9,6 +9,8 @@ A phone-friendly dashboard and control surface for a Grant Aerona / ecoNET contr
 
 For the full project case study, architecture, controls guide, performance-calculation notes and limitations, see [the technical article](TECHNICAL_ARTICLE.md).
 
+For the optional YunoHost portal-tile icon, see [the portal icon notes](docs/yunohost-portal-icon.md).
+
 
 ## What it does
 
