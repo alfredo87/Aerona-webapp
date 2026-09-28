@@ -18,10 +18,10 @@ Locate the portal configuration that contains the Redirect tile label:
 sudo grep -R -n -C 5 'Aerona heat pump' /etc/yunohost/portal/
 ```
 
-Open the matching JSON file, find the `Aerona heat pump` tile, and set its `portal_logo` value to:
+Open the matching JSON file, find the `Aerona Heat Pump` tile, and replace its existing `logo` URL with:
 
 ```json
-"portal_logo": "aerona-portal-icon.png"
+"logo": "/yunohost/sso/applogos/aerona-portal-icon.png"
 ```
 
 Refresh the YunoHost portal in the browser. The icon change does not alter the Aerona app, its Docker container or its reverse proxy.
