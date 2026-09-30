@@ -18,6 +18,14 @@ async function refresh() {
     const data = await response.json();
     const effectiveTarget = Number.parseFloat(data.comfortTarget.state);
     text("comfort", Number.isFinite(effectiveTarget) ? `${effectiveTarget.toFixed(1)} °C` : "—");
+    const calculatedTarget = Number.parseFloat(data.calculatedTarget.state);
+    const calculatedTargetLine = document.getElementById("calculated-target");
+    if (Number.isFinite(calculatedTarget)) {
+      text("calculated-target", `Calculated set target ${calculatedTarget.toFixed(1)} °C`);
+      calculatedTargetLine.hidden = false;
+    } else {
+      calculatedTargetLine.hidden = true;
+    }
     text("room", show(data.roomTemp));
     text("outdoor", show(data.outdoorTemp));
     text("eco", show(data.ecoTarget));

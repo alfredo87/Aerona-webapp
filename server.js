@@ -23,6 +23,7 @@ if (!haUrl || !haToken || !appUsername || !appPassword || !sessionSecret) {
 
 const entities = {
   comfortTarget: "sensor.grant_circuit_2_comfort_target",
+  calculatedTarget: "sensor.grant_circuit_2_calculated_set_temperature",
   roomTemp: "sensor.grant_circuit_2_room_temperature",
   outdoorTemp: "sensor.grant_controller_outdoor_temperature",
   ecoTarget: "sensor.grant_circuit_2_eco_target",
