@@ -21,7 +21,7 @@ async function refresh() {
     const calculatedTarget = Number.parseFloat(data.calculatedTarget.state);
     const calculatedTargetLine = document.getElementById("calculated-target");
     if (Number.isFinite(calculatedTarget)) {
-      text("calculated-target", `Calculated set target ${calculatedTarget.toFixed(1)} °C`);
+      text("calculated-target", `Weather target ${calculatedTarget.toFixed(1)} °C`);
       calculatedTargetLine.hidden = false;
     } else {
       calculatedTargetLine.hidden = true;
