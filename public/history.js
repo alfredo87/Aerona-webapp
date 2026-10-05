@@ -30,10 +30,11 @@ function chart(data) {
   max += padding;
   const width = 1000;
   const height = 250;
-  const edge = 40;
+  const edge = 80;
   const x = (timestamp) => edge + ((timestamp - data.startTime) / (data.endTime - data.startTime)) * (width - edge * 2);
   const y = (value) => height - edge - ((value - min) / (max - min)) * (height - edge * 2);
   const axisUnit = [...new Set(usable.map((series) => series.unit))].join("/");
+  const visibleAxisUnit = axisUnit === "COP/SPF" ? "" : ` ${axisUnit}`;
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("role", "img");
@@ -46,7 +47,7 @@ function chart(data) {
     svg.append(line);
     const label = document.createElementNS(svg.namespaceURI, "text");
     label.setAttribute("x", edge - 10); label.setAttribute("y", position + 6); label.setAttribute("text-anchor", "end"); label.setAttribute("class", "chart-y-axis");
-    label.textContent = `${axisNumber(max - fraction * (max - min))} ${axisUnit}`;
+    label.textContent = `${axisNumber(max - fraction * (max - min))}${visibleAxisUnit}`;
     svg.append(label);
   });
   const axis = document.createElementNS(svg.namespaceURI, "line");
