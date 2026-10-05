@@ -5,6 +5,7 @@ const number = (value) => new Intl.NumberFormat(undefined, { maximumFractionDigi
 const time = (timestamp, includeDate = false) => new Date(timestamp).toLocaleString([], includeDate
   ? { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }
   : { hour: "2-digit", minute: "2-digit" });
+const axisNumber = (value) => Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(1)}k` : number(value);
 
 function chart(data) {
   const usable = data.series.filter((series) => series.points.length);
@@ -32,6 +33,7 @@ function chart(data) {
   const edge = 40;
   const x = (timestamp) => edge + ((timestamp - data.startTime) / (data.endTime - data.startTime)) * (width - edge * 2);
   const y = (value) => height - edge - ((value - min) / (max - min)) * (height - edge * 2);
+  const axisUnit = [...new Set(usable.map((series) => series.unit))].join("/");
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("role", "img");
@@ -42,7 +44,15 @@ function chart(data) {
     line.setAttribute("x1", edge); line.setAttribute("x2", width - edge); line.setAttribute("y1", position); line.setAttribute("y2", position);
     line.setAttribute("class", "chart-grid");
     svg.append(line);
+    const label = document.createElementNS(svg.namespaceURI, "text");
+    label.setAttribute("x", edge - 10); label.setAttribute("y", position + 6); label.setAttribute("text-anchor", "end"); label.setAttribute("class", "chart-y-axis");
+    label.textContent = `${axisNumber(max - fraction * (max - min))} ${axisUnit}`;
+    svg.append(label);
   });
+  const axis = document.createElementNS(svg.namespaceURI, "line");
+  axis.setAttribute("x1", edge); axis.setAttribute("x2", edge); axis.setAttribute("y1", edge); axis.setAttribute("y2", height - edge);
+  axis.setAttribute("class", "chart-grid");
+  svg.append(axis);
   usable.forEach((series) => {
     const line = document.createElementNS(svg.namespaceURI, "polyline");
     line.setAttribute("points", series.points.map(([timestamp, value]) => `${x(timestamp)},${y(value)}`).join(" "));
