@@ -45,6 +45,37 @@ const entities = {
   dhwSpf: "sensor.grant_dhw_spf"
 };
 
+const historyGroups = {
+  climate: {
+    title: "Climate and targets",
+    series: [
+      { id: entities.roomTemp, label: "Room", colour: "#5eead4", unit: "°C" },
+      { id: entities.outdoorTemp, label: "Outside", colour: "#7dd3fc", unit: "°C" },
+      { id: entities.cylinderTemp, label: "Hot water", colour: "#fbbf24", unit: "°C" },
+      { id: entities.calculatedTarget, label: "Weather target", colour: "#fb7185", unit: "°C" }
+    ]
+  },
+  performance: {
+    title: "Heat-pump power",
+    series: [
+      { id: entities.power, label: "Electrical power", colour: "#fbbf24", unit: "W" },
+      { id: entities.thermalPower, label: "Thermal output", colour: "#5eead4", unit: "W" }
+    ]
+  },
+  efficiency: {
+    title: "Efficiency",
+    series: [
+      { id: entities.cop, label: "Live COP", colour: "#a78bfa", unit: "COP" },
+      { id: entities.seasonalPerformance, label: "Seasonal SPF", colour: "#5eead4", unit: "SPF" },
+      { id: entities.heatingSpf, label: "Heating SPF", colour: "#38bdf8", unit: "SPF" },
+      { id: entities.dhwSpf, label: "DHW SPF", colour: "#fb7185", unit: "SPF" }
+    ]
+  },
+  flow: { title: "Flow rate", series: [{ id: entities.flowRate, label: "Flow rate", colour: "#38bdf8", unit: "L/min" }] },
+  fan: { title: "Fan speed", series: [{ id: entities.fanSpeed, label: "Fan speed", colour: "#60a5fa", unit: "rpm" }] },
+  pressure: { title: "Water pressure", series: [{ id: entities.waterPressure, label: "Water pressure", colour: "#f97316", unit: "bar" }] }
+};
+
 function credentialsMatch(username, password) {
   const supplied = `${username}:${password}`;
   const expected = `${appUsername}:${appPassword}`;
@@ -141,6 +172,42 @@ async function overview() {
 
   if (savedCopChanged) await saveArrivalHeat();
   return { ...data, arrivalHeat: { resumeAt: arrivalHeat.resumeAt || 0 } };
+}
+
+function reduceHistory(states, startTime, endTime, buckets = 180) {
+  const width = (endTime - startTime) / buckets;
+  const values = Array.from({ length: buckets }, () => []);
+  for (const state of states) {
+    const value = Number.parseFloat(state.state);
+    const timestamp = Date.parse(state.last_updated || state.last_changed || "");
+    if (!Number.isFinite(value) || !Number.isFinite(timestamp) || timestamp < startTime || timestamp > endTime) continue;
+    const bucket = Math.min(buckets - 1, Math.max(0, Math.floor((timestamp - startTime) / width)));
+    values[bucket].push(value);
+  }
+  return values.flatMap((bucket, index) => {
+    if (!bucket.length) return [];
+    return [[Math.round(startTime + (index + 0.5) * width), Number((bucket.reduce((total, value) => total + value, 0) / bucket.length).toFixed(3))]];
+  });
+}
+
+async function history(group, hours) {
+  const definition = historyGroups[group];
+  if (!definition || ![24, 168].includes(hours)) throw new Error("Unknown history request");
+  const endTime = Date.now();
+  const startTime = endTime - hours * 60 * 60 * 1000;
+  const start = new Date(startTime).toISOString();
+  const end = new Date(endTime).toISOString();
+  const series = await Promise.all(definition.series.map(async (item) => {
+    const params = new URLSearchParams({ filter_entity_id: item.id, end_time: end, no_attributes: "", significant_changes_only: "" });
+    try {
+      const result = await fromHa(`/api/history/period/${encodeURIComponent(start)}?${params}`);
+      const states = Array.isArray(result?.[0]) ? result[0] : [];
+      return { ...item, points: reduceHistory(states, startTime, endTime) };
+    } catch {
+      return { ...item, points: [] };
+    }
+  }));
+  return { title: definition.title, startTime, endTime, series };
 }
 
 async function saveArrivalHeat() {
@@ -266,6 +333,11 @@ createServer(async (request, response) => {
     }
     if (request.method === "GET" && url.pathname === "/api/overview") {
       return send(response, 200, JSON.stringify(await overview()), { "Content-Type": "application/json" });
+    }
+    if (request.method === "GET" && url.pathname === "/api/history") {
+      const group = url.searchParams.get("group") || "climate";
+      const hours = Number(url.searchParams.get("hours") || 24);
+      return send(response, 200, JSON.stringify(await history(group, hours)), { "Content-Type": "application/json" });
     }
     if (request.method === "POST" && url.pathname === "/api/actions/arrival-heat") {
       const { hours } = await readJson(request);

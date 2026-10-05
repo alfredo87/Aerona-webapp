@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101827">
+    <title>Grant Aerona history</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <div><p class="eyebrow">GRANT AERONA</p><h1>History</h1></div>
+        <div class="header-actions"><nav class="page-nav" aria-label="App pages"><a href="/">Dashboard</a><a class="active" href="/history.html" aria-current="page">History</a></nav><button id="logout" class="logout">Sign out</button></div>
+      </header>
+
+      <section class="history-toolbar" aria-label="Chart options">
+        <div class="range-picker" aria-label="History range"><button class="active" data-hours="24">24 hours</button><button data-hours="168">7 days</button></div>
+        <p id="history-status" class="muted">Loading history…</p>
+      </section>
+
+      <section id="history-charts" class="history-charts" aria-live="polite"></section>
+    </main>
+    <script src="/history.js"></script>
+  </body>
+</html>
