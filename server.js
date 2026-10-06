@@ -51,7 +51,7 @@ const historyGroups = {
     series: [
       { id: entities.roomTemp, label: "Room", colour: "#5eead4", unit: "°C" },
       { id: entities.outdoorTemp, label: "Outside", colour: "#7dd3fc", unit: "°C" },
-      { id: entities.cylinderTemp, label: "Hot water", colour: "#fbbf24", unit: "°C" },
+      { id: entities.cylinderTemp, label: "Hot water", colour: "#fbbf24", unit: "°C", axis: "right" },
       { id: entities.calculatedTarget, label: "Weather target", colour: "#fb7185", unit: "°C" }
     ]
   },
@@ -59,7 +59,7 @@ const historyGroups = {
     title: "Heat-pump power",
     series: [
       { id: entities.power, label: "Electrical power", colour: "#fbbf24", unit: "W" },
-      { id: entities.thermalPower, label: "Thermal output", colour: "#5eead4", unit: "W" }
+      { id: entities.thermalPower, label: "Thermal output", colour: "#5eead4", unit: "W", axis: "right" }
     ]
   },
   efficiency: {

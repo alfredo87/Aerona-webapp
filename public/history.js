@@ -7,6 +7,42 @@ const time = (timestamp, includeDate = false) => new Date(timestamp).toLocaleStr
   : { hour: "2-digit", minute: "2-digit" });
 const axisNumber = (value) => Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(1)}k` : number(value);
 
+function niceScale(values) {
+  let low = Math.min(...values);
+  let high = Math.max(...values);
+  if (low === high) {
+    const adjustment = Math.max(Math.abs(low) * 0.08, 0.5);
+    low -= adjustment;
+    high += adjustment;
+  }
+  if (low >= 0 && low < (high - low) * 0.12) low = 0;
+  const targetStep = (high - low) / 4;
+  const magnitude = 10 ** Math.floor(Math.log10(targetStep));
+  const normalised = targetStep / magnitude;
+  const step = (normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10) * magnitude;
+  const min = Math.floor(low / step) * step;
+  const max = Math.ceil(high / step) * step;
+  return { min, max, ticks: Array.from({ length: Math.round((max - min) / step) + 1 }, (_, index) => min + index * step) };
+}
+
+function tickTimes(startTime, endTime) {
+  const tick = new Date(startTime);
+  if (hours === 24) {
+    tick.setMinutes(0, 0, 0);
+    if (tick.getTime() <= startTime) tick.setHours(tick.getHours() + 1);
+  } else {
+    tick.setHours(0, 0, 0, 0);
+    if (tick.getTime() <= startTime) tick.setDate(tick.getDate() + 1);
+  }
+  const ticks = [];
+  while (tick.getTime() < endTime) {
+    ticks.push(tick.getTime());
+    if (hours === 24) tick.setHours(tick.getHours() + 1);
+    else tick.setDate(tick.getDate() + 1);
+  }
+  return ticks;
+}
+
 function chart(data) {
   const usable = data.series.filter((series) => series.points.length);
   const card = document.createElement("article");
@@ -22,52 +58,73 @@ function chart(data) {
     return card;
   }
 
-  const allPoints = usable.flatMap((series) => series.points.map(([, value]) => value));
-  let min = Math.min(...allPoints);
-  let max = Math.max(...allPoints);
-  const padding = Math.max((max - min) * 0.12, max === min ? Math.max(Math.abs(max) * 0.12, 1) : 0.2);
-  min -= padding;
-  max += padding;
   const width = 1000;
   const height = 250;
   const edge = 80;
   const x = (timestamp) => edge + ((timestamp - data.startTime) / (data.endTime - data.startTime)) * (width - edge * 2);
-  const y = (value) => height - edge - ((value - min) / (max - min)) * (height - edge * 2);
-  const axisUnit = [...new Set(usable.map((series) => series.unit))].join("/");
-  const visibleAxisUnit = axisUnit === "COP/SPF" ? "" : ` ${axisUnit}`;
+  const byAxis = (axis) => usable.filter((series) => (series.axis || "left") === axis);
+  const scales = Object.fromEntries(["left", "right"].flatMap((axis) => {
+    const values = byAxis(axis).flatMap((series) => series.points.map(([, value]) => value));
+    return values.length ? [[axis, niceScale(values)]] : [];
+  }));
+  const y = (value, axis = "left") => {
+    const scale = scales[axis];
+    return height - edge - ((value - scale.min) / (scale.max - scale.min)) * (height - edge * 2);
+  };
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("role", "img");
   svg.setAttribute("aria-label", `${data.title} over the selected period`);
-  [0, 0.5, 1].forEach((fraction) => {
+  const addAxis = (axis, drawGrid) => {
+    const scale = scales[axis];
+    if (!scale) return;
+    const xPosition = axis === "left" ? edge : width - edge;
+    const direction = axis === "left" ? -10 : 10;
+    const anchor = axis === "left" ? "end" : "start";
+    const unit = [...new Set(byAxis(axis).map((series) => series.unit))].join("/");
+    const visibleUnit = unit === "COP/SPF" ? "" : ` ${unit}`;
+    scale.ticks.forEach((value) => {
+      const position = y(value, axis);
+      if (drawGrid) {
+        const line = document.createElementNS(svg.namespaceURI, "line");
+        line.setAttribute("x1", edge); line.setAttribute("x2", width - edge); line.setAttribute("y1", position); line.setAttribute("y2", position);
+        line.setAttribute("class", "chart-grid");
+        svg.append(line);
+      }
+      const label = document.createElementNS(svg.namespaceURI, "text");
+      label.setAttribute("x", xPosition + direction); label.setAttribute("y", position + 6); label.setAttribute("text-anchor", anchor); label.setAttribute("class", "chart-y-axis");
+      label.textContent = `${axisNumber(value)}${visibleUnit}`;
+      svg.append(label);
+    });
     const line = document.createElementNS(svg.namespaceURI, "line");
-    const position = edge + fraction * (height - edge * 2);
-    line.setAttribute("x1", edge); line.setAttribute("x2", width - edge); line.setAttribute("y1", position); line.setAttribute("y2", position);
+    line.setAttribute("x1", xPosition); line.setAttribute("x2", xPosition); line.setAttribute("y1", edge); line.setAttribute("y2", height - edge);
     line.setAttribute("class", "chart-grid");
     svg.append(line);
-    const label = document.createElementNS(svg.namespaceURI, "text");
-    label.setAttribute("x", edge - 10); label.setAttribute("y", position + 6); label.setAttribute("text-anchor", "end"); label.setAttribute("class", "chart-y-axis");
-    label.textContent = `${axisNumber(max - fraction * (max - min))}${visibleAxisUnit}`;
-    svg.append(label);
+  };
+  addAxis("left", true);
+  addAxis("right", false);
+  tickTimes(data.startTime, data.endTime).forEach((timestamp, index) => {
+    const line = document.createElementNS(svg.namespaceURI, "line");
+    line.setAttribute("x1", x(timestamp)); line.setAttribute("x2", x(timestamp)); line.setAttribute("y1", edge); line.setAttribute("y2", height - edge);
+    line.setAttribute("class", "chart-grid chart-time-tick");
+    svg.append(line);
+    const showLabel = hours === 168 || index % 3 === 0;
+    if (showLabel) {
+      const label = document.createElementNS(svg.namespaceURI, "text");
+      label.setAttribute("x", x(timestamp)); label.setAttribute("y", height - 12); label.setAttribute("text-anchor", "middle"); label.setAttribute("class", "chart-axis");
+      label.textContent = hours === 24 ? time(timestamp) : new Date(timestamp).toLocaleDateString([], { weekday: "short", day: "numeric" });
+      svg.append(label);
+    }
   });
-  const axis = document.createElementNS(svg.namespaceURI, "line");
-  axis.setAttribute("x1", edge); axis.setAttribute("x2", edge); axis.setAttribute("y1", edge); axis.setAttribute("y2", height - edge);
-  axis.setAttribute("class", "chart-grid");
-  svg.append(axis);
   usable.forEach((series) => {
     const line = document.createElementNS(svg.namespaceURI, "polyline");
-    line.setAttribute("points", series.points.map(([timestamp, value]) => `${x(timestamp)},${y(value)}`).join(" "));
+    line.setAttribute("points", series.points.map(([timestamp, value]) => `${x(timestamp)},${y(value, series.axis || "left")}`).join(" "));
     line.setAttribute("fill", "none");
     line.setAttribute("stroke", series.colour);
     line.setAttribute("stroke-width", "3");
     line.setAttribute("stroke-linecap", "round");
     line.setAttribute("stroke-linejoin", "round");
     svg.append(line);
-  });
-  [[data.startTime, time(data.startTime, hours === 168)], [(data.startTime + data.endTime) / 2, time((data.startTime + data.endTime) / 2, hours === 168)], [data.endTime, time(data.endTime, hours === 168)]].forEach(([timestamp, label]) => {
-    const text = document.createElementNS(svg.namespaceURI, "text");
-    text.setAttribute("x", x(timestamp)); text.setAttribute("y", height - 12); text.setAttribute("text-anchor", "middle"); text.setAttribute("class", "chart-axis"); text.textContent = label;
-    svg.append(text);
   });
   card.append(svg);
   const legend = document.createElement("div");
