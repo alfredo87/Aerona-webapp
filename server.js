@@ -47,28 +47,31 @@ const entities = {
 
 const historyGroups = {
   climate: {
-    title: "Climate and targets",
+    title: "Room, outside and weather target",
     series: [
       { id: entities.roomTemp, label: "Room", colour: "#5eead4", unit: "°C" },
       { id: entities.outdoorTemp, label: "Outside", colour: "#7dd3fc", unit: "°C" },
-      { id: entities.cylinderTemp, label: "Hot water", colour: "#fbbf24", unit: "°C", axis: "right" },
       { id: entities.calculatedTarget, label: "Weather target", colour: "#fb7185", unit: "°C" }
     ]
   },
-  performance: {
-    title: "Heat-pump power",
-    series: [
-      { id: entities.power, label: "Electrical power", colour: "#fbbf24", unit: "W" },
-      { id: entities.thermalPower, label: "Thermal output", colour: "#5eead4", unit: "W", axis: "right" }
-    ]
-  },
-  efficiency: {
-    title: "Efficiency",
+  hotwater: { title: "Hot water temperature", series: [{ id: entities.cylinderTemp, label: "Hot water", colour: "#fbbf24", unit: "°C" }] },
+  electrical: { title: "Electrical power", series: [{ id: entities.power, label: "Electrical power", colour: "#fbbf24", unit: "W" }] },
+  thermal: { title: "Thermal output", series: [{ id: entities.thermalPower, label: "Thermal output", colour: "#5eead4", unit: "W" }] },
+  cop: {
+    title: "Coefficient of performance",
     tickStep: 2,
     series: [
       { id: entities.cop, label: "Live COP", colour: "#a78bfa", unit: "COP" },
-      { id: entities.seasonalPerformance, label: "Seasonal SPF", colour: "#5eead4", unit: "SPF" },
-      { id: entities.heatingSpf, label: "Heating SPF", colour: "#38bdf8", unit: "SPF" },
+      { id: entities.heatingCop, label: "Heating COP", colour: "#5eead4", unit: "COP" },
+      { id: entities.dhwCop, label: "DHW COP", colour: "#fb7185", unit: "COP" }
+    ]
+  },
+  spf: {
+    title: "Seasonal performance factor",
+    tickStep: 2,
+    series: [
+      { id: entities.seasonalPerformance, label: "Seasonal SPF", colour: "#a78bfa", unit: "SPF" },
+      { id: entities.heatingSpf, label: "Heating SPF", colour: "#5eead4", unit: "SPF" },
       { id: entities.dhwSpf, label: "DHW SPF", colour: "#fb7185", unit: "SPF" }
     ]
   },

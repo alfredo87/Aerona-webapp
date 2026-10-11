@@ -19,6 +19,10 @@
         <p id="history-status" class="muted">Loading history…</p>
       </section>
 
+      <nav class="metric-picker" aria-label="Choose chart">
+        <button class="active" data-group="climate">Climate</button><button data-group="hotwater">Hot water</button><button data-group="electrical">Electrical</button><button data-group="thermal">Thermal</button><button data-group="cop">COP</button><button data-group="spf">SPF</button><button data-group="flow">Flow</button><button data-group="fan">Fan</button><button data-group="pressure">Pressure</button>
+      </nav>
+
       <section id="history-charts" class="history-charts" aria-live="polite"></section>
     </main>
     <script src="/history.js"></script>

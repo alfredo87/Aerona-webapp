@@ -1,5 +1,5 @@
-const groups = ["climate", "performance", "efficiency", "flow", "fan", "pressure"];
 let hours = 24;
+let group = "climate";
 
 const number = (value) => new Intl.NumberFormat(undefined, { maximumFractionDigits: value >= 100 ? 0 : 1 }).format(value);
 const time = (timestamp, includeDate = false) => new Date(timestamp).toLocaleString([], includeDate
@@ -155,12 +155,9 @@ async function load() {
   const status = document.getElementById("history-status");
   status.textContent = "Loading history…";
   try {
-    const responses = await Promise.all(groups.map(async (group) => {
-      const response = await fetch(`/api/history?group=${group}&hours=${hours}`);
-      if (!response.ok) throw new Error();
-      return response.json();
-    }));
-    target.replaceChildren(...responses.map(chart));
+    const response = await fetch(`/api/history?group=${group}&hours=${hours}`);
+    if (!response.ok) throw new Error();
+    target.replaceChildren(chart(await response.json()));
     status.textContent = `Updated ${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   } catch {
     status.textContent = "History is unavailable";
@@ -171,6 +168,12 @@ async function load() {
 document.querySelectorAll("[data-hours]").forEach((button) => button.addEventListener("click", () => {
   hours = Number(button.dataset.hours);
   document.querySelectorAll("[data-hours]").forEach((candidate) => candidate.classList.toggle("active", candidate === button));
+  load();
+}));
+
+document.querySelectorAll("[data-group]").forEach((button) => button.addEventListener("click", () => {
+  group = button.dataset.group;
+  document.querySelectorAll("[data-group]").forEach((candidate) => candidate.classList.toggle("active", candidate === button));
   load();
 }));
 
