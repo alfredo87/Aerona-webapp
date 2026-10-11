@@ -64,6 +64,7 @@ const historyGroups = {
   },
   efficiency: {
     title: "Efficiency",
+    tickStep: 2,
     series: [
       { id: entities.cop, label: "Live COP", colour: "#a78bfa", unit: "COP" },
       { id: entities.seasonalPerformance, label: "Seasonal SPF", colour: "#5eead4", unit: "SPF" },
@@ -207,7 +208,7 @@ async function history(group, hours) {
       return { ...item, points: [] };
     }
   }));
-  return { title: definition.title, startTime, endTime, series };
+  return { title: definition.title, tickStep: definition.tickStep || null, startTime, endTime, series };
 }
 
 async function saveArrivalHeat() {

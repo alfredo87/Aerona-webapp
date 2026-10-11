@@ -7,7 +7,7 @@ const time = (timestamp, includeDate = false) => new Date(timestamp).toLocaleStr
   : { hour: "2-digit", minute: "2-digit" });
 const axisNumber = (value) => Math.abs(value) >= 1000 ? `${(value / 1000).toFixed(1)}k` : number(value);
 
-function niceScale(values) {
+function niceScale(values, fixedStep = null) {
   let low = Math.min(...values);
   let high = Math.max(...values);
   if (low === high) {
@@ -19,7 +19,7 @@ function niceScale(values) {
   const targetStep = (high - low) / 4;
   const magnitude = 10 ** Math.floor(Math.log10(targetStep));
   const normalised = targetStep / magnitude;
-  const step = (normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10) * magnitude;
+  const step = fixedStep || (normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10) * magnitude;
   const min = Math.floor(low / step) * step;
   const max = Math.ceil(high / step) * step;
   return { min, max, ticks: Array.from({ length: Math.round((max - min) / step) + 1 }, (_, index) => min + index * step) };
@@ -65,7 +65,7 @@ function chart(data) {
   const byAxis = (axis) => usable.filter((series) => (series.axis || "left") === axis);
   const scales = Object.fromEntries(["left", "right"].flatMap((axis) => {
     const values = byAxis(axis).flatMap((series) => series.points.map(([, value]) => value));
-    return values.length ? [[axis, niceScale(values)]] : [];
+    return values.length ? [[axis, niceScale(values, data.tickStep)]] : [];
   }));
   const y = (value, axis = "left") => {
     const scale = scales[axis];
