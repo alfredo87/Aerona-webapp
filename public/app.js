@@ -26,7 +26,8 @@ async function refresh() {
     } else {
       calculatedTargetLine.hidden = true;
     }
-    text("room", show(data.roomTemp));
+    const roomDisplay = Number.parseFloat(data.roomTemp.state);
+    text("room", Number.isFinite(roomDisplay) ? `${roomDisplay.toFixed(1)} °C` : "—");
     text("outdoor", show(data.outdoorTemp));
     text("eco", show(data.ecoTarget));
     const roomTemperature = Number.parseFloat(data.roomTemp.state);
