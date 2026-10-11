@@ -81,7 +81,9 @@ function chart(data) {
     const xPosition = axis === "left" ? edge : width - edge;
     const direction = axis === "left" ? -10 : 10;
     const anchor = axis === "left" ? "end" : "start";
-    const unit = [...new Set(byAxis(axis).map((series) => series.unit))].join("/");
+    const axisSeries = byAxis(axis);
+    const unit = [...new Set(axisSeries.map((series) => series.unit))].join("/");
+    const axisColour = axis === "right" ? axisSeries[0].colour : "";
     const visibleUnit = unit === "COP/SPF" ? "" : ` ${unit}`;
     scale.ticks.forEach((value) => {
       const position = y(value, axis);
@@ -93,12 +95,14 @@ function chart(data) {
       }
       const label = document.createElementNS(svg.namespaceURI, "text");
       label.setAttribute("x", xPosition + direction); label.setAttribute("y", position + 6); label.setAttribute("text-anchor", anchor); label.setAttribute("class", "chart-y-axis");
+      if (axisColour) label.style.fill = axisColour;
       label.textContent = `${axisNumber(value)}${visibleUnit}`;
       svg.append(label);
     });
     const line = document.createElementNS(svg.namespaceURI, "line");
     line.setAttribute("x1", xPosition); line.setAttribute("x2", xPosition); line.setAttribute("y1", edge); line.setAttribute("y2", height - edge);
     line.setAttribute("class", "chart-grid");
+    if (axisColour) { line.style.stroke = axisColour; line.style.opacity = "0.55"; }
     svg.append(line);
   };
   addAxis("left", true);
