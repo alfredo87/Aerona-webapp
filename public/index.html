@@ -14,6 +14,11 @@
         <div class="header-actions"><nav class="page-nav" aria-label="App pages"><a class="active" href="/">Dashboard</a><a href="/history.html">History</a></nav><p id="updated" class="muted">Connecting…</p><button id="logout" class="logout">Sign out</button></div>
       </header>
 
+      <section id="alarm-banner" class="alarm-banner" role="alert" hidden>
+        <span aria-hidden="true">⚠</span>
+        <div><p>Controller alarm active</p><strong id="alarm-message">Alarm reported by the controller</strong><small id="alarm-detail">Check the controller alarm list before clearing it.</small></div>
+      </section>
+
       <section class="dashboard" aria-live="polite">
         <article class="hero heating"><span>⌂</span><small>Room temperature</small><strong id="room">—</strong><div id="calculated-target" class="calculated-target" hidden>Calculated set target —</div><div class="dial-context"><span>Target <b id="comfort">—</b></span><span>Outside <b id="outdoor">—</b></span></div></article>
         <article class="tile eco"><span aria-label="Night time">☾</span><p>Night time target</p><strong id="eco">—</strong></article>

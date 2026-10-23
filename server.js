@@ -42,7 +42,9 @@ const entities = {
   heatingCop: "sensor.grant_space_heating_cop",
   dhwCop: "sensor.grant_dhw_cop",
   heatingSpf: "sensor.grant_space_heating_spf",
-  dhwSpf: "sensor.grant_dhw_spf"
+  dhwSpf: "sensor.grant_dhw_spf",
+  alarmActive: "binary_sensor.grant_controller_alarm_active",
+  activeAlarm: "sensor.grant_controller_active_alarm"
 };
 
 const historyGroups = {

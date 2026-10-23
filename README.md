@@ -19,6 +19,7 @@ For the optional YunoHost portal-tile icon, see [the portal icon notes](docs/yun
 - Estimates live thermal output and COP from water flow, flow/return temperature difference, and controller electrical power.
 - Tracks an accumulating seasonal performance factor (SPF) from calculated thermal and electrical energy.
 - Displays the actual cylinder temperature and DHW target.
+- Shows a high-visibility controller-alarm banner, including the active alarm code.
 - Provides Arrival Heat (1, 2, 4, or 8 hours of Circuit 2 Comfort mode, then automatic Scheduled-mode return) and Away / Eco hold (Night/Eco mode until manually resumed), plus a one-off DHW-loading request.
 - Uses a local sign-in page with an HttpOnly 60-day device session.
 - Keeps the Home Assistant token and controller credentials out of the browser.
@@ -38,6 +39,35 @@ For the optional YunoHost portal-tile icon, see [the portal icon notes](docs/yun
 - The HA REST commands `rest_command.grant_circuit2_set_mode` and `rest_command.grant_dhw_one_off_loading`.
 
 The Circuit 2 room sensor should read `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value. The direct controller sensors use the same `/econet/regParams` REST response: `curr.TempCWU` for cylinder temperature, `curr.TempWthr` for outdoor temperature, `curr.currentFlow` for flow rate, tile `3` for fan speed, and tile `76` for water pressure.
+
+### Controller alarms
+
+Add this as another item in your existing top-level `rest:` list. It polls the controller's local alarm history; an alarm whose `toDate` is `null` is still active. The web app uses these two entity IDs to show a red alarm banner.
+
+```yaml
+  - resource: "http://ECONET_IP/econet/sysParams"
+    authentication: basic
+    username: !secret econet_http_username
+    password: !secret econet_http_password
+    scan_interval: 30
+    timeout: 10
+    binary_sensor:
+      - name: "Grant Controller Alarm Active"
+        unique_id: grant_controller_alarm_active
+        value_template: >-
+          {% set active = value_json.alarms | default([], true) | selectattr('toDate', 'equalto', none) | list %}
+          {{ active | count > 0 }}
+        device_class: problem
+    sensor:
+      - name: "Grant Controller Active Alarm"
+        unique_id: grant_controller_active_alarm
+        value_template: >-
+          {% set active = value_json.alarms | default([], true) | selectattr('toDate', 'equalto', none) | list %}
+          {{ active[0].code if active else 'none' }}
+        icon: mdi:alert-circle
+```
+
+Do not use the `kasowanie_alarmow` (clear alarms) parameter as part of the dashboard. Investigate the controller message first, then clear it at the controller only when appropriate.
 
 ### Arrival Heat control
 

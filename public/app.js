@@ -16,6 +16,16 @@ async function refresh() {
     const response = await fetch("/api/overview");
     if (!response.ok) throw new Error();
     const data = await response.json();
+    const alarmActive = data.alarmActive?.state === "on";
+    const alarmCode = data.activeAlarm?.state;
+    const alarmBanner = document.getElementById("alarm-banner");
+    alarmBanner.hidden = !alarmActive;
+    if (alarmActive) {
+      const code = alarmCode && !["unknown", "unavailable", "none"].includes(alarmCode.toLowerCase())
+        ? ` — code ${alarmCode}`
+        : "";
+      text("alarm-message", `Controller alarm active${code}`);
+    }
     const effectiveTarget = Number.parseFloat(data.comfortTarget.state);
     text("comfort", Number.isFinite(effectiveTarget) ? `${effectiveTarget.toFixed(1)} °C` : "—");
     const calculatedTarget = Number.parseFloat(data.calculatedTarget.state);
