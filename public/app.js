@@ -20,7 +20,7 @@ async function refresh() {
     if (!response.ok) throw new Error();
     const data = await response.json();
     const alarmActive = data.alarmActive?.state === "on";
-    const alarmCode = data.activeAlarm?.state;
+    const alarmCode = String(data.activeAlarm?.state || "");
     const alarmBanner = document.getElementById("alarm-banner");
     alarmBanner.hidden = !alarmActive;
     if (alarmActive) {
