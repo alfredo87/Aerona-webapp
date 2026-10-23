@@ -6,6 +6,9 @@ const text = (id, value) => {
   element.textContent = value;
   element.classList.add("value-change");
 };
+const alarmDescriptions = {
+  "150": "P03 — Low refrigerant pressure protection"
+};
 const show = (entry, fallbackUnit = "") => {
   if (entry.state === "unavailable" || entry.state === "unknown") return "—";
   return `${entry.state}${entry.unit || fallbackUnit ? ` ${entry.unit || fallbackUnit}` : ""}`;
@@ -21,10 +24,10 @@ async function refresh() {
     const alarmBanner = document.getElementById("alarm-banner");
     alarmBanner.hidden = !alarmActive;
     if (alarmActive) {
-      const code = alarmCode && !["unknown", "unavailable", "none"].includes(alarmCode.toLowerCase())
-        ? ` — code ${alarmCode}`
-        : "";
-      text("alarm-message", `Controller alarm active${code}`);
+      const hasCode = alarmCode && !["unknown", "unavailable", "none"].includes(alarmCode.toLowerCase());
+      const description = hasCode ? alarmDescriptions[alarmCode] : "";
+      text("alarm-message", description || `Controller alarm active${hasCode ? ` — code ${alarmCode}` : ""}`);
+      text("alarm-detail", description ? `Controller code ${alarmCode}. Contact your installer if it recurs; do not repeatedly reset it.` : "Check the controller alarm list before clearing it.");
     }
     const effectiveTarget = Number.parseFloat(data.comfortTarget.state);
     text("comfort", Number.isFinite(effectiveTarget) ? `${effectiveTarget.toFixed(1)} °C` : "—");

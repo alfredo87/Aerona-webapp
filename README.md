@@ -69,6 +69,8 @@ Add this as another item in your existing top-level `rest:` list. It polls the c
 
 Do not use the `kasowanie_alarmow` (clear alarms) parameter as part of the dashboard. Investigate the controller message first, then clear it at the controller only when appropriate.
 
+Known controller alarm codes can be given a friendly label in `public/app.js`. Code `150` is displayed as **P03 — Low refrigerant pressure protection**, matching the controller's alarm list.
+
 ### Arrival Heat control
 
 Add this command beneath your existing `rest_command:` entry, using the same controller credentials as your other commands:
