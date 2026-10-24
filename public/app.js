@@ -69,6 +69,8 @@ async function refresh() {
     text("power", show(data.power));
     text("today", show(data.energyToday));
     text("total", show(data.energyTotal));
+    const valveState = String(data.valveState?.state || "").trim().toUpperCase();
+    text("valve-state", `3-way valve: ${["CH", "DHW"].includes(valveState) ? valveState : "—"}`);
     text("flow", show(data.flowRate, "L/min"));
     text("fan", show(data.fanSpeed, "rpm"));
     text("pressure", show(data.waterPressure, "bar"));

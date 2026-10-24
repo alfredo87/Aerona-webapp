@@ -36,6 +36,7 @@ const entities = {
   flowRate: "sensor.grant_controller_flow_rate",
   fanSpeed: "sensor.grant_controller_fan_speed",
   waterPressure: "sensor.grant_controller_water_pressure",
+  valveState: "sensor.grant_aerona_econet_three_way_valve_state",
   thermalPower: "sensor.grant_calculated_thermal_power",
   cop: "sensor.grant_estimated_cop",
   seasonalPerformance: "sensor.grant_seasonal_performance_factor",
