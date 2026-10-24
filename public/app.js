@@ -71,6 +71,9 @@ async function refresh() {
     text("total", show(data.energyTotal));
     const valveState = String(data.valveState?.state || "").trim().toUpperCase();
     text("valve-state", ["CH", "DHW"].includes(valveState) ? valveState : "—");
+    const valveArrow = document.getElementById("valve-arrow");
+    valveArrow.setAttribute("visibility", ["CH", "DHW"].includes(valveState) ? "visible" : "hidden");
+    valveArrow.setAttribute("transform", valveState === "DHW" ? "rotate(-90 24 25)" : "");
     text("flow", show(data.flowRate, "L/min"));
     text("fan", show(data.fanSpeed, "rpm"));
     text("pressure", show(data.waterPressure, "bar"));
