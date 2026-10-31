@@ -1,0 +1,7 @@
+services:
+  econet-mqtt-publisher:
+    build: .
+    image: aerona/econet-mqtt-publisher:local
+    container_name: econet-mqtt-publisher
+    restart: unless-stopped
+    env_file: .env

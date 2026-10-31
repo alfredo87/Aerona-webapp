@@ -16,6 +16,7 @@ For the optional YunoHost portal-tile icon, see [the portal icon notes](docs/yun
 
 - Displays Circuit 2 target, room and outdoor temperatures, heating mode, live electrical power, and estimated energy.
 - Displays controller flow rate, fan speed, and water pressure in a compact System row.
+- Optionally includes a companion MQTT publisher for controller values such as the three-way-valve state; see [the YunoHost deployment guide](docs/yunohost-mqtt-publisher.md).
 - Estimates live thermal output and COP from water flow, flow/return temperature difference, and controller electrical power.
 - Tracks an accumulating seasonal performance factor (SPF) from calculated thermal and electrical energy.
 - Displays the actual cylinder temperature and DHW target.
