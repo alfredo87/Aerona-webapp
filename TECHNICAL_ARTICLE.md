@@ -40,6 +40,26 @@ Grant ecoNET 300 controller  --->  Aerona heat pump, DHW and Circuit 2
 
 The Docker app runs on an always-on Debian/YunoHost server, bound only to `127.0.0.1`. YunoHost's Nginx reverse proxy publishes it over a certificate-backed HTTPS subdomain. Port 8787 is not opened to the internet. The browser cannot see the ecoNET credentials, cannot see the Home Assistant token, and cannot make arbitrary Home Assistant requests.
 
+### Could this run on one server?
+
+Yes. For a new installation, a single always-on Linux server could host Home Assistant, the Aerona web app, the ecoNET MQTT publisher and broker, and an HTTPS reverse proxy. The ecoNET controller would still remain on the private home LAN, and the server would communicate with it locally.
+
+```text
+ecoNET controller ── private LAN ──> single Linux server
+                                      ├─ Home Assistant
+                                      ├─ Aerona web app
+                                      ├─ MQTT publisher and broker
+                                      └─ HTTPS reverse proxy
+                                               │
+                                      phone or browser
+```
+
+This would reduce the hardware to one small, always-on computer, plus the heat-pump controller itself. It would not require a desktop PC or vendor-cloud access. A compact low-power mini-PC or a suitably specified home server could fulfil that role.
+
+There is a trade-off. The present arrangement separates Home Assistant on the BRIX from the internet-facing YunoHost web server. That limits the effect of a fault or maintenance activity on either machine, keeps the public web service away from the home-automation host, and allows each machine to be restarted or updated independently. It is therefore a sensible architecture where reliable heating monitoring and securely accessible remote control matter.
+
+The current app also deliberately uses Home Assistant for entity mapping, history, automations, COP/SPF calculations, alarms and controlled writes. Removing Home Assistant altogether would require rebuilding those functions directly into the web app. That could reduce the software stack, but would be substantially more work and would lose Home Assistant's mature history, automation and integration facilities.
+
 ## 3. Alternatives considered
 
 ### Controller touchscreen and ecoNET phone app
