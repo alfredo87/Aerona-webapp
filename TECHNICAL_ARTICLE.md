@@ -110,7 +110,7 @@ The completed dashboard shows:
 
 It offers these active controls:
 
-- **DHW boost:** asks the controller for its one-off cylinder loading;
+- **DHW boost:** starts the controller's one-off cylinder loading; while active, the same button stops it and returns DHW to its normal schedule;
 - **Arrival Heat:** sets Circuit 2 to Comfort/Day for 1, 2, 4 or 8 hours, then restores Scheduled mode automatically;
 - **Hold Eco while away:** sets Circuit 2 to Night/Eco until manually resumed; and
 - **Resume schedule:** returns control to the controller's day/night programme.
@@ -170,9 +170,9 @@ Open the app's HTTPS address and sign in using the app credentials. The server c
 - The system row shows flow rate, fan speed and water pressure. Zero flow or fan speed while idle is normal.
 - Performance values should be read as trends across complete heating or DHW cycles, not as laboratory measurements.
 
-### Start DHW boost
+### Start or stop DHW boost
 
-Tap **DHW boost**. This requests one-off cylinder loading from the controller. Confirm it through the dashboard: cylinder temperature, three-way-valve state and electrical power should respond as expected. The controller retains all stopping and safety conditions.
+Tap **DHW boost**. This requests one-off cylinder loading from the controller. While the controller reports that one-off loading is active, the dashboard says **Heating towards target** and the button becomes **Stop DHW boost**. Tap it again to return DHW to its normal schedule, which the dashboard labels **On schedule**. Confirm the result through cylinder temperature, three-way-valve state and electrical power; the controller retains all stopping and safety conditions.
 
 ### Warm the house before arriving
 

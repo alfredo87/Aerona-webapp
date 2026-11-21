@@ -30,6 +30,7 @@ const entities = {
   mode: "sensor.grant_circuit_2_mode",
   dhwSetpoint: "sensor.grant_dhw_setpoint",
   cylinderTemp: "sensor.grant_controller_cylinder_temperature",
+  dhwBoostActive: "sensor.grant_dhw_boost_active",
   power: "sensor.grant_controller_electrical_power",
   energyToday: "sensor.grant_estimated_electrical_energy_today",
   energyTotal: "sensor.grant_estimated_electrical_energy",
@@ -244,6 +245,19 @@ async function setCircuit2Mode(value) {
   });
 }
 
+async function setDhwBoost(active) {
+  await fromHa("/api/services/rest_command/grant_dhw_one_off_loading", {
+    method: "POST",
+    body: JSON.stringify({ value: active ? 1 : 0 })
+  });
+  // Request a fresh controller poll so the button returns to the controller's
+  // actual value rather than waiting for the normal REST scan interval.
+  await fromHa("/api/services/homeassistant/update_entity", {
+    method: "POST",
+    body: JSON.stringify({ entity_id: entities.dhwBoostActive })
+  }).catch(() => {});
+}
+
 async function returnToSchedule() {
   try {
     await setCircuit2Mode(3);
@@ -361,7 +375,9 @@ createServer(async (request, response) => {
       return send(response, 204, "");
     }
     if (request.method === "POST" && url.pathname === "/api/actions/dhw-boost") {
-      await fromHa("/api/services/rest_command/grant_dhw_one_off_loading", { method: "POST", body: "{}" });
+      const { active } = await readJson(request);
+      if (typeof active !== "boolean") return send(response, 400, JSON.stringify({ error: "Choose whether DHW boost should be on or off." }), { "Content-Type": "application/json" });
+      await setDhwBoost(active);
       return send(response, 204, "");
     }
     if (request.method === "GET") return staticFile(url.pathname, response);

@@ -63,9 +63,15 @@ async function refresh() {
     const dhwTarget = Number.parseFloat(data.dhwSetpoint.state);
     const dhwAtTarget = Number.isFinite(cylinder) && Number.isFinite(dhwTarget) && cylinder >= dhwTarget;
     const dhwButton = document.querySelector(".dhw-action");
+    const dhwBoostValue = String(data.dhwBoostActive?.state || "").trim();
+    const dhwBoostKnown = dhwBoostValue === "0" || dhwBoostValue === "1";
+    const dhwBoostActive = dhwBoostValue === "1";
     dhwButton.style.setProperty("--progress", `${Number.isFinite(cylinder) && Number.isFinite(dhwTarget) && dhwTarget > 0 ? Math.min(1, Math.max(0, cylinder / dhwTarget)) : 0}turn`);
     dhwButton.classList.toggle("at-target", dhwAtTarget);
-    text("dhw-button-status", dhwAtTarget ? "Cylinder at target" : "Heating towards target");
+    dhwButton.classList.toggle("boost-active", dhwBoostActive);
+    dhwButton.dataset.boostActive = String(dhwBoostActive);
+    text("dhw-action-label", dhwBoostActive ? "Stop DHW boost" : "DHW boost");
+    text("dhw-button-status", dhwBoostKnown ? (dhwBoostActive ? "Heating towards target" : "On schedule") : "Boost status unavailable");
     text("power", show(data.power));
     text("today", show(data.energyToday));
     text("total", show(data.energyTotal));
@@ -97,9 +103,10 @@ async function refresh() {
 document.querySelectorAll("[data-action]").forEach((button) => button.addEventListener("click", async () => {
   const action = button.dataset.action;
   const dhw = action === "dhw-boost";
+  const dhwBoostActive = button.dataset.boostActive === "true";
   const hours = Number(button.dataset.hours);
   const prompt = dhw
-    ? "Start one-off DHW cylinder loading?"
+    ? (dhwBoostActive ? "Stop one-off DHW loading and return to the normal schedule?" : "Start one-off DHW cylinder loading?")
     : action === "arrival-heat"
       ? `Use Circuit 2 Comfort mode for ${hours} hour${hours === 1 ? "" : "s"}, then automatically resume the normal schedule?`
       : action === "away-eco"
@@ -113,11 +120,11 @@ document.querySelectorAll("[data-action]").forEach((button) => button.addEventLi
     const response = await fetch(`/api/actions/${action}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: action === "arrival-heat" ? JSON.stringify({ hours }) : undefined
+      body: action === "arrival-heat" ? JSON.stringify({ hours }) : dhw ? JSON.stringify({ active: !dhwBoostActive }) : undefined
     });
     if (!response.ok) throw new Error();
-    text("notice", dhw ? "DHW boost requested." : action === "arrival-heat" ? "Arrival Heat started." : action === "away-eco" ? "Circuit 2 is holding the Eco target." : "Circuit 2 returned to Scheduled mode.");
-    setTimeout(refresh, 1500);
+    text("notice", dhw ? (dhwBoostActive ? "DHW boost stopped — following schedule." : "DHW boost requested.") : action === "arrival-heat" ? "Arrival Heat started." : action === "away-eco" ? "Circuit 2 is holding the Eco target." : "Circuit 2 returned to Scheduled mode.");
+    setTimeout(refresh, 2500);
   } catch {
     text("notice", "The request could not be completed.");
   } finally {

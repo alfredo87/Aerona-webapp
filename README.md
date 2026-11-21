@@ -37,7 +37,7 @@ For the optional YunoHost portal-tile icon, see [the portal icon notes](docs/yun
   - `sensor.grant_controller_fan_speed`
   - `sensor.grant_controller_water_pressure`
   - the Circuit 2, DHW and energy sensors listed in `server.js`
-- The HA REST commands `rest_command.grant_circuit2_set_mode` and `rest_command.grant_dhw_one_off_loading`.
+- The HA REST commands `rest_command.grant_circuit2_set_mode` and `rest_command.grant_dhw_one_off_loading`, plus `sensor.grant_dhw_boost_active`.
 
 The Circuit 2 room sensor should read `curr.Circuit2thermostatTemp`, not the ASHP ambient-air value. The direct controller sensors use the same `/econet/regParams` REST response: `curr.TempCWU` for cylinder temperature, `curr.TempWthr` for outdoor temperature, `curr.currentFlow` for flow rate, tile `3` for fan speed, and tile `76` for water pressure.
 
@@ -86,6 +86,30 @@ Add this command beneath your existing `rest_command:` entry, using the same con
 ```
 
 The app uses value `1` for Circuit 2 Comfort/Day mode and `3` to restore Scheduled mode. Its return time is saved in the Docker `data/` directory so a container restart does not lose it.
+
+### DHW boost toggle
+
+The controller parameter `115` (`HDWStartOneLoading`) reports `1` while one-off DHW loading is active and `0` when it is off. Add this sensor to the `sensor:` list beneath your existing `/econet/editParams` REST resource:
+
+```yaml
+      - name: "Grant DHW Boost Active"
+        unique_id: grant_dhw_boost_active
+        value_template: "{{ value_json.data['115'].value | int(0) }}"
+        icon: mdi:water-plus
+```
+
+Then change the existing `grant_dhw_one_off_loading` REST command URL so it accepts the value sent by the app. Value `1` starts one-off loading; value `0` stops it and returns DHW to its normal schedule.
+
+```yaml
+  grant_dhw_one_off_loading:
+    url: "http://ECONET_IP/econet/newParam?newParamName=115&newParamValue={{ value | default(1) }}"
+    method: PUT
+    username: !secret econet_http_username
+    password: !secret econet_http_password
+    authentication: basic
+```
+
+After checking configuration and restarting Home Assistant, the dashboard shows **Heating towards target** and changes the button to **Stop DHW boost** while the controller reports `1`. When the controller reports `0`, it shows **On schedule**.
 
 ### Direct-controller REST sensors
 
